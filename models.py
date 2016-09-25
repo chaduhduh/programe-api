@@ -6,6 +6,9 @@ import random
 from datetime import date
 from protorpc import messages
 from google.appengine.ext import ndb
+from Level import All_Levels as Levels
+
+levels = Levels()
 
 
 class User(ndb.Model):
@@ -16,11 +19,12 @@ class User(ndb.Model):
 
 class Game(ndb.Model):
     """Game object"""
-    target = ndb.IntegerProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
+    current_level = ndb.StringProperty(required=True, default=levels.getLevel("level_one").getName())
+    score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
     def new_game(cls, user, min, max, attempts):
@@ -28,7 +32,6 @@ class Game(ndb.Model):
         if max < min:
             raise ValueError('Maximum must be greater than minimum')
         game = Game(user=user,
-                    target=random.choice(range(1, max + 1)),
                     attempts_allowed=attempts,
                     attempts_remaining=attempts,
                     game_over=False)
@@ -42,6 +45,8 @@ class Game(ndb.Model):
         form.user_name = self.user.get().name
         form.attempts_remaining = self.attempts_remaining
         form.game_over = self.game_over
+        form.current_level = self.current_level
+        form.score = self.score
         form.message = message
         return form
 
@@ -75,6 +80,8 @@ class GameForm(messages.Message):
     game_over = messages.BooleanField(3, required=True)
     message = messages.StringField(4, required=True)
     user_name = messages.StringField(5, required=True)
+    current_level = messages.StringField(6, required=True)
+    score = messages.IntegerField(7, required=True)
 
 
 class NewGameForm(messages.Message):
@@ -83,6 +90,7 @@ class NewGameForm(messages.Message):
     min = messages.IntegerField(2, default=1)
     max = messages.IntegerField(3, default=10)
     attempts = messages.IntegerField(4, default=5)
+    score = messages.IntegerField(6, default=0)
 
 
 class MakeMoveForm(messages.Message):
