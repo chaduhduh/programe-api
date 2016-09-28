@@ -7,6 +7,7 @@ from datetime import date
 from protorpc import messages
 from google.appengine.ext import ndb
 from Level import All_Levels as Levels
+from Level import Level as Level
 
 levels = Levels()
 
@@ -23,7 +24,7 @@ class Game(ndb.Model):
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
-    current_level = ndb.StringProperty(required=True, default=levels.getLevel("level_one").getName())
+    current_level = ndb.StringProperty(required=True, default="level_one")
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
@@ -114,3 +115,12 @@ class ScoreForms(messages.Message):
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
     message = messages.StringField(1, required=True)
+
+class LevelForm(messages.Message):
+    """ScoreForm for outbound Score information"""
+    name = messages.StringField(1, required=True)
+    pieces = messages.StringField(2, required=True)
+    solutions = messages.StringField(3, required=True)
+    board_structure = messages.StringField(4, required=True)
+
+

@@ -46,8 +46,9 @@ class Level():
     def setBoardStructure(self, structure):
         self._board_structure = structure;
 
-    def getBoarStructure(self):
+    def getBoardStructure(self):
         return self._board_structure or []
+
 
 
 
@@ -62,28 +63,44 @@ class All_Levels():
     level_one.setPieces(["start","print","'game'","end"]);
     level_one.setSolutions([["start","print","'game'","end"]]);
     level_one.setBoardStructure({
-        "main" : {
-            "row" : {
+        "rows" : [
+             {
                 "pieces" : ["start"]
-            }
-            "row" : {
-                "pieces" : ["print", "'game'"]
-                "row" : {
-                    "pieces" : []       # this is how nested rows are defined
-                }
-            }
-            "row" : {
+            },
+            {
+                "pieces" : [],       # this is how nested rows are defined,
+                "rows" : []
+            },
+            {
                 "pieces" : ["end"]
             }
-        }
+        ]
     });
     levels.append(level_one)
+
+
+    # Level Two
+    level_two = Level()
+    level_two.setName("level_two")
+    level_two.setPieces(["start","end"]);
+    level_two.setSolutions([["start","end"]]);
+    level_two.setBoardStructure({
+        "rows" : [
+             {
+                "pieces" : ["start"]
+            },
+            {
+                "pieces" : ["end"]
+            }
+        ]
+    });
+    levels.append(level_two)
 
 
     def getLevel(self, level_name):
         """ returns a specific level from name """
 
         for level in self.levels:
-            if level.getName() is level_name:
+            if level.getName() == level_name:
                 return level
         return False

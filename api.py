@@ -11,21 +11,26 @@ from protorpc import remote, messages
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from Level import All_Levels as Levels
+from Level import Level as Level
+import json
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
-    ScoreForms
+    ScoreForms, LevelForm
 from utils import get_by_urlsafe
 
 levels = Levels()
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
-        urlsafe_game_key=messages.StringField(1),)
+        urlsafe_game_key=messages.StringField(1),
+        )
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
-        urlsafe_game_key=messages.StringField(1),)
+        level_name=messages.StringField(1),
+        )
 MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
     MakeMoveForm,
-    urlsafe_game_key=messages.StringField(1),)
+    urlsafe_game_key=messages.StringField(1),
+    )
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
 
@@ -146,17 +151,17 @@ class ProgrameApi(remote.Service):
 
 
     @endpoints.method(request_message=GET_LEVEL_REQUEST,
-                      response_message=GameForm,
-                      path='level/{urlsafe_game_key}',
+                      response_message=LevelForm,
+                      path='level/{level_name}',
                       name='get_level',
                       http_method='GET')
     def get_level(self, request):
         """Return the current game state."""
-        game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if game:
-            return game.to_form('Time to make a move!')
-        else:
-            raise endpoints.NotFoundException('Game not found!')
+        level = levels.getLevel(str(request.level_name));
+        if not level:
+          raise endpoints.NotFoundException(
+                    'Level Not Found')
+        return LevelForm(name=level.getName(), pieces=json.dumps(level.getPieces()), solutions=str(level.getSolutions()), board_structure=str(level.getBoardStructure()))
 
     @staticmethod
     def _cache_average_attempts():
