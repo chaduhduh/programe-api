@@ -20,7 +20,6 @@ class User(ndb.Model):
 
 class Game(ndb.Model):
     """Game object"""
-    attempts_allowed = ndb.IntegerProperty(required=True)
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
@@ -28,14 +27,10 @@ class Game(ndb.Model):
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
-    def new_game(cls, user, min, max, attempts):
+    def new_game(self, user, attempts_remaining):
         """Creates and returns a new game"""
-        if max < min:
-            raise ValueError('Maximum must be greater than minimum')
         game = Game(user=user,
-                    attempts_allowed=attempts,
-                    attempts_remaining=attempts,
-                    game_over=False)
+                    attempts_remaining=attempts_remaining)
         game.put()
         return game
 
@@ -58,7 +53,7 @@ class Game(ndb.Model):
         self.put()
         # Add the game to the score 'board'
         score = Score(user=self.user, date=date.today(), won=won,
-                      guesses=self.attempts_allowed - self.attempts_remaining)
+                      guesses=self.attempts_remaining)
         score.put()
 
 
@@ -88,15 +83,14 @@ class GameForm(messages.Message):
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     user_name = messages.StringField(1, required=True)
-    min = messages.IntegerField(2, default=1)
-    max = messages.IntegerField(3, default=10)
-    attempts = messages.IntegerField(4, default=5)
-    score = messages.IntegerField(6, default=0)
+    attempts_remaining = messages.IntegerField(2, default=5)
+    score = messages.IntegerField(3, default=0)
+    current_level = messages.StringField(4, default="new-game")
 
 
-class MakeMoveForm(messages.Message):
+class SubmitBoardForm(messages.Message):
     """Used to make a move in an existing game"""
-    guess = messages.IntegerField(1, required=True)
+    solution_attempt = messages.StringField(1, required=True)
 
 
 class ScoreForm(messages.Message):

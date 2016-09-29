@@ -15,7 +15,7 @@ from Level import Level as Level
 import json
 
 from models import User, Game, Score
-from models import StringMessage, NewGameForm, GameForm, MakeMoveForm,\
+from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
     ScoreForms, LevelForm
 from utils import get_by_urlsafe
 
@@ -27,9 +27,9 @@ GET_GAME_REQUEST = endpoints.ResourceContainer(
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
         level_name=messages.StringField(1),
         )
-MAKE_MOVE_REQUEST = endpoints.ResourceContainer(
-    MakeMoveForm,
-    urlsafe_game_key=messages.StringField(1),
+SUBMIT_BOARD_REQUEST = endpoints.ResourceContainer(
+    SubmitBoardForm,
+    urlsafe_game_key=messages.StringField(1)
     )
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
@@ -66,8 +66,7 @@ class ProgrameApi(remote.Service):
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
         try:
-            game = Game.new_game(user.key, request.min,
-                                 request.max, request.attempts)
+            game = Game.new_game(user.key, request.attempts_remaining)
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
@@ -76,7 +75,7 @@ class ProgrameApi(remote.Service):
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
         taskqueue.add(url='/tasks/cache_average_attempts')
-        return game.to_form('Good luck playing Guess a Number!')
+        return game.to_form('Good luck playing programe')
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
@@ -91,33 +90,49 @@ class ProgrameApi(remote.Service):
         else:
             raise endpoints.NotFoundException('Game not found!')
 
-    @endpoints.method(request_message=MAKE_MOVE_REQUEST,
+
+    @endpoints.method(request_message=SUBMIT_BOARD_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
-                      name='make_move',
+                      name='submit_board',
                       http_method='PUT')
-    def make_move(self, request):
+    def submit_board(self, request):
         """Makes a move. Returns a game state with message"""
+
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game.game_over:
             return game.to_form('Game already over!')
 
         game.attempts_remaining -= 1
-        if request.guess == game.target:
-            game.end_game(True)
-            return game.to_form('You win!')
+        current_level = levels.getLevel(game.current_level)
 
-        if request.guess < game.target:
-            msg = 'Too low!'
-        else:
-            msg = 'Too high!'
+        if current_level is False:
+          current_level = levels.getLevelByIndex(0)
+          game.current_level = current_level.getName()
+
+        if not current_level.isSolution(request.solution_attempt):
+          game.put()
+          return game.to_form("There was a bug in your code!!")
+        # solved - register score and get the next level
+
+        game.score += current_level.getSolutionScore();
+        next_level = levels.getNextLevel(current_level.getName())
+        
+        if next_level is False:    # no levels left
+          game.current_level = "Winner"
+          game.end_game(True)
+          return game.to_form("You have reached the end of the game")
+
+        game.current_level =  next_level.getName();
+        # end game or update game data
 
         if game.attempts_remaining < 1:
             game.end_game(False)
-            return game.to_form(msg + ' Game over!')
+            return game.to_form('Game over!')
         else:
             game.put()
-            return game.to_form(msg)
+            return game.to_form("Program Compiled!")
+
 
     @endpoints.method(response_message=ScoreForms,
                       path='scores',
