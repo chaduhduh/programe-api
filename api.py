@@ -19,26 +19,38 @@ from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
     ScoreForms, LevelForm
 from utils import get_by_urlsafe
 
+
 levels = Levels()
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
-        urlsafe_game_key=messages.StringField(1),
-        )
+    urlsafe_game_key=messages.StringField(1),
+    )
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
-        level_name=messages.StringField(1),
-        )
+    level_name=messages.StringField(1),
+    )
 SUBMIT_BOARD_REQUEST = endpoints.ResourceContainer(
     SubmitBoardForm,
     urlsafe_game_key=messages.StringField(1)
     )
-USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
-                                           email=messages.StringField(2))
+USER_REQUEST = endpoints.ResourceContainer(
+    user_name=messages.StringField(1),
+    email=messages.StringField(2)
+    )
+DELETE_GAME_REQUEST = endpoints.ResourceContainer(
+    urlsafe_game_key=messages.StringField(1),
+    user_name=messages.StringField(2)
+    )
+
+
+
 
 MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
+
 
 @endpoints.api(name='programe', version='v1')
 class ProgrameApi(remote.Service):
     """Game API"""
+
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=StringMessage,
                       path='user',
@@ -53,6 +65,7 @@ class ProgrameApi(remote.Service):
         user.put()
         return StringMessage(message='User {} created!'.format(
                 request.user_name))
+
 
     @endpoints.method(request_message=NEW_GAME_REQUEST,
                       response_message=GameForm,
@@ -70,12 +83,12 @@ class ProgrameApi(remote.Service):
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
-
         # Use a task queue to update the average attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
         taskqueue.add(url='/tasks/cache_average_attempts')
         return game.to_form('Good luck playing programe')
+
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
@@ -89,6 +102,29 @@ class ProgrameApi(remote.Service):
             return game.to_form('Time to make a move!')
         else:
             raise endpoints.NotFoundException('Game not found!')
+
+
+    @endpoints.method(request_message=DELETE_GAME_REQUEST,
+                      response_message=StringMessage,
+                      path='game',
+                      name='cancel_game',
+                      http_method='DELETE')
+    def delete_game(self, request):
+        """Deletes an existing game"""
+        user = User.query(User.name == request.user_name).get()
+        if not user:
+            raise endpoints.NotFoundException(
+                    'A User with that name does not exist!')
+        # check for existing game from same user
+
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if not game or user.name is not game.user.get().name:
+          raise endpoints.NotFoundException(
+                    'Unable to delete or game does not exist - ' + game_user_name_name)
+        # do delete
+
+        game.key.delete()
+        return StringMessage(message="Game deleted")
 
 
     @endpoints.method(request_message=SUBMIT_BOARD_REQUEST,
@@ -142,6 +178,7 @@ class ProgrameApi(remote.Service):
         """Return all scores"""
         return ScoreForms(items=[score.to_form() for score in Score.query()])
 
+
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=ScoreForms,
                       path='scores/user/{user_name}',
@@ -155,6 +192,7 @@ class ProgrameApi(remote.Service):
                     'A User with that name does not exist!')
         scores = Score.query(Score.user == user.key)
         return ScoreForms(items=[score.to_form() for score in scores])
+
 
     @endpoints.method(response_message=StringMessage,
                       path='games/average_attempts',
@@ -177,6 +215,7 @@ class ProgrameApi(remote.Service):
           raise endpoints.NotFoundException(
                     'Level Not Found')
         return LevelForm(name=level.getName(), pieces=json.dumps(level.getPieces()), solutions=str(level.getSolutions()), board_structure=str(level.getBoardStructure()))
+
 
     @staticmethod
     def _cache_average_attempts():
