@@ -14,3 +14,16 @@ indexes:
   properties:
   - name: game_over
   - name: user
+
+- kind: Win
+  properties:
+  - name: score
+    direction: desc
+  - name: attempts_used
+
+- kind: Win
+  properties:
+  - name: user
+  - name: score
+    direction: desc
+  - name: attempts_used

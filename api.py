@@ -14,9 +14,9 @@ from Level import All_Levels as Levels
 from Level import Level as Level
 import json
 
-from models import User, Game, Score
+from models import User, Game, Win
 from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
-    ScoreForms, LevelForm, GameFormList
+    WinForms, LevelForm, GameFormList, RankForm
 from utils import get_by_urlsafe
 
 
@@ -27,6 +27,9 @@ GET_GAME_REQUEST = endpoints.ResourceContainer(
     )
 GET_GAMES_REQUEST = endpoints.ResourceContainer(
     username=messages.StringField(1),
+    )
+GET_HIGH_SCORE_REQUEST = endpoints.ResourceContainer(
+    number_of_results=messages.IntegerField(1,required=False,default=10),
     )
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
     level_name=messages.StringField(1),
@@ -82,14 +85,16 @@ class ProgrameApi(remote.Service):
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
         try:
-            game = Game.new_game(user.key, request.attempts_remaining)
+            game = Game.new_game(user.key, request.attempts_remaining, request.score)
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
         # Use a task queue to update the average attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
-        taskqueue.add(url='/tasks/cache_average_attempts')
+
+        # TODO: do this
+        # taskqueue.add(url='/tasks/cache_average_attempts')
         return game.to_form('Good luck playing programe')
 
 
@@ -121,9 +126,51 @@ class ProgrameApi(remote.Service):
         games = Game.query(Game.user == user.key)
         if not games:
             raise endpoints.NotFoundException('No Games Found.')
-
-        games_list = [ game.to_form("") for game in games]
+        games_list = [game.to_form("") for game in games] or []
         return GameFormList(games=games_list)
+
+
+    # get_high_scores
+
+    @endpoints.method(request_message=GET_HIGH_SCORE_REQUEST,
+                      response_message=WinForms,
+                      path='the-scoreboard',
+                      name='get_high_scores',
+                      http_method='GET')
+    def get_high_scores(self, request):
+        """Return the scoreboard. Optional: number_of_results limiter"""
+        number_of_results = request.number_of_results or 10
+        all_wins = Win.query(limit=number_of_results).order(-Win.score, Win.attempts_used) or []
+        return WinForms(wins=[win.to_form() for win in all_wins])
+       
+
+        games = Game.query(Game.user == user.key)
+        if not games:
+            raise endpoints.NotFoundException('No Games Found.')
+        games_list = [game.to_form("") for game in games] or []
+        return GameFormList(games=games_list)
+
+
+    # get_user_ranks
+
+    @endpoints.method(response_message=RankForm,
+                      path='user/ranks',
+                      name='get_user_ranks',
+                      http_method='GET')
+    def get_ranks_scores(self, request):
+        """returns list of all top players by rank"""
+        user_wins = []
+        users = User.query()
+        for user in users:
+            user_wins.append(Win.query(Win.user == user.key).order(-Win.score, Win.attempts_used).get())
+
+        user_highscores = []
+        for i, win in enumerate(user_wins):
+          user_highscores.append(win.to_rank(i+1))
+        return RankForm(ranks=user_highscores)
+
+
+    # get_game_history - store guess attempt with level + date
             
 
     @endpoints.method(request_message=DELETE_GAME_REQUEST,
@@ -162,6 +209,7 @@ class ProgrameApi(remote.Service):
             return game.to_form('Game already over!')
 
         game.attempts_remaining -= 1
+        game.attempts_used += 1
         current_level = levels.getLevel(game.current_level)
 
         if current_level is False:
@@ -174,15 +222,16 @@ class ProgrameApi(remote.Service):
         # solved - register score and get the next level
 
         game.score += current_level.getSolutionScore();
+        game.attempts_remaining += 5
         next_level = levels.getNextLevel(current_level.getName())
         
         if next_level is False:    # no levels left
           game.current_level = "Winner"
           game.end_game(True)
-          return game.to_form("You have reached the end of the game")
+          return game.to_form("You have reached the end of the game, click to view your ranks")
 
         game.current_level =  next_level.getName();
-        # end game or update game data
+        # end game or update game datad
 
         if game.attempts_remaining < 1:
             game.end_game(False)
@@ -192,28 +241,29 @@ class ProgrameApi(remote.Service):
             return game.to_form("Program Compiled!")
 
 
-    @endpoints.method(response_message=ScoreForms,
-                      path='scores',
-                      name='get_scores',
+    @endpoints.method(response_message=WinForms,
+                      path='wins',
+                      name='get_wins',
                       http_method='GET')
-    def get_scores(self, request):
-        """Return all scores"""
-        return ScoreForms(items=[score.to_form() for score in Score.query()])
+    def get_wins(self, request):
+        """Return all wins"""
+        all_wins = Win.query() or []
+        return WinForms(wins=[win.to_form() for win in all_wins])
 
 
     @endpoints.method(request_message=USER_REQUEST,
-                      response_message=ScoreForms,
-                      path='scores/user/{user_name}',
-                      name='get_user_scores',
+                      response_message=WinForms,
+                      path='win/user/{user_name}',
+                      name='get_user_wins',
                       http_method='GET')
-    def get_user_scores(self, request):
-        """Returns all of an individual User's scores"""
+    def get_user_wins(self, request):
+        """Returns all of an individual User's wins"""
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
-        scores = Score.query(Score.user == user.key)
-        return ScoreForms(items=[score.to_form() for score in scores])
+        all_wins = Win.query(Win.user == user.key) or []
+        return WinForms(wins=[win.to_form() for win in all_wins])
 
 
     @endpoints.method(response_message=StringMessage,

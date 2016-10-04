@@ -4,6 +4,7 @@ classes they can include methods (such as 'to_form' and 'new_game')."""
 
 import random
 from datetime import date
+from datetime import datetime
 from protorpc import messages
 from google.appengine.ext import ndb
 from Level import All_Levels as Levels
@@ -21,16 +22,17 @@ class User(ndb.Model):
 class Game(ndb.Model):
     """Game object"""
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
+    attempts_used = ndb.IntegerProperty(required=True, default=0)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
     current_level = ndb.StringProperty(required=True, default="level_one")
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
-    def new_game(self, user, attempts_remaining):
+    def new_game(self, user, attempts_remaining,score=0):
         """Creates and returns a new game"""
         game = Game(user=user,
-                    attempts_remaining=attempts_remaining)
+                    attempts_remaining=attempts_remaining, score=score)
         game.put()
         return game
 
@@ -40,6 +42,7 @@ class Game(ndb.Model):
         form.urlsafe_key = self.key.urlsafe()
         form.user_name = self.user.get().name
         form.attempts_remaining = self.attempts_remaining
+        form.attempts_used = self.attempts_used
         form.game_over = self.game_over
         form.current_level = self.current_level
         form.score = self.score
@@ -51,33 +54,40 @@ class Game(ndb.Model):
         the player lost."""
         self.game_over = True
         self.put()
-        # Add the game to the score 'board'
-        score = Score(user=self.user, date=date.today(), won=won,
-                      guesses=self.attempts_remaining)
-        score.put()
+         # Add the game to the score 'board'
+        game_win = Win(user=self.user,date=datetime.utcnow(),
+                       won=True,attempts_used=self.attempts_used, score=self.score)
+        game_win.put()
 
 
-class Score(ndb.Model):
+class Win(ndb.Model):
     """Score object"""
     user = ndb.KeyProperty(required=True, kind='User')
     date = ndb.DateProperty(required=True)
     won = ndb.BooleanProperty(required=True)
-    guesses = ndb.IntegerProperty(required=True)
+    attempts_used = ndb.IntegerProperty(required=True)
+    score = ndb.IntegerProperty(required=True)
 
     def to_form(self):
-        return ScoreForm(user_name=self.user.get().name, won=self.won,
-                         date=str(self.date), guesses=self.guesses)
+        return WinForm(user_name=self.user.get().name, won=self.won,
+                         date=str(self.date), attempts_used=self.attempts_used, score=self.score)
+
+    def to_rank(self, rank_index):
+    	return Rank(user_name=self.user.get().name, date=str(self.date), 
+    				attempts_used=self.attempts_used, score=self.score, rank=rank_index)
+
 
 
 class GameForm(messages.Message):
     """GameForm for outbound game state information"""
     urlsafe_key = messages.StringField(1, required=True)
     attempts_remaining = messages.IntegerField(2, required=True)
-    game_over = messages.BooleanField(3, required=True)
-    message = messages.StringField(4, required=True)
-    user_name = messages.StringField(5, required=True)
-    current_level = messages.StringField(6, required=True)
-    score = messages.IntegerField(7, required=True)
+    attempts_used = messages.IntegerField(3, required=True)
+    game_over = messages.BooleanField(4, required=True)
+    message = messages.StringField(5, required=True)
+    user_name = messages.StringField(6, required=True)
+    current_level = messages.StringField(7, required=True)
+    score = messages.IntegerField(8, required=True)
 
 class GameFormList(messages.Message):
     """GameForm for outbound game state information"""
@@ -88,8 +98,9 @@ class NewGameForm(messages.Message):
     """Used to create a new game"""
     user_name = messages.StringField(1, required=True)
     attempts_remaining = messages.IntegerField(2, default=5)
-    score = messages.IntegerField(3, default=0)
-    current_level = messages.StringField(4, default="new-game")
+    attempt_used = messages.IntegerField(3, default=0)
+    score = messages.IntegerField(4, default=0)
+    current_level = messages.StringField(5, default="new-game")
 
 
 class SubmitBoardForm(messages.Message):
@@ -97,17 +108,17 @@ class SubmitBoardForm(messages.Message):
     solution_attempt = messages.StringField(1, required=True)
 
 
-class ScoreForm(messages.Message):
-    """ScoreForm for outbound Score information"""
+class WinForm(messages.Message):
+    """WinForm for outbound Win information ..scoreboard perhaps?"""
     user_name = messages.StringField(1, required=True)
     date = messages.StringField(2, required=True)
     won = messages.BooleanField(3, required=True)
-    guesses = messages.IntegerField(4, required=True)
+    attempts_used = messages.IntegerField(4, required=True)
+    score = messages.IntegerField(5, required=True)
 
-
-class ScoreForms(messages.Message):
-    """Return multiple ScoreForms"""
-    items = messages.MessageField(ScoreForm, 1, repeated=True)
+class WinForms(messages.Message):
+    """Return multiple WinForms"""
+    wins = messages.MessageField(WinForm, 1, repeated=True)
 
 
 class StringMessage(messages.Message):
@@ -121,4 +132,15 @@ class LevelForm(messages.Message):
     solutions = messages.StringField(3, required=True)
     board_structure = messages.StringField(4, required=True)
 
+class Rank(messages.Message):
+	"""defines how we will show rank info"""
+	user_name = messages.StringField(1, required=True)
+	date = messages.StringField(2, required=True)
+	attempts_used = messages.IntegerField(3, required=True)
+	score = messages.IntegerField(4, required=True)
+	rank = messages.IntegerField(5, required=True)
+
+class RankForm(messages.Message):
+    """Defines how we will output rank info"""
+    ranks = messages.MessageField(Rank, 1, repeated=True)
 
