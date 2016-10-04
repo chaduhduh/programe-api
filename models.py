@@ -59,6 +59,23 @@ class Game(ndb.Model):
                        won=True,attempts_used=self.attempts_used, score=self.score)
         game_win.put()
 
+class GameHistory(ndb.Model):
+    """History object"""
+    user = ndb.KeyProperty(required=True, kind='User')
+    date = ndb.DateProperty(required=True)
+    action = ndb.StringProperty(required=True)
+    score = ndb.IntegerProperty(required=True)
+    submission = ndb.StringProperty(required=True)
+
+    def to_form(self, submission):
+        """Returns a GameForm representation of the Game"""
+        history = HistoryForm()
+        history.user_name = self.user.get().name
+        history.date = self.date
+        history.action = self.action
+        history.score = self.score
+        history.submission = self.submission
+        return history
 
 class Win(ndb.Model):
     """Score object"""
@@ -93,6 +110,17 @@ class GameFormList(messages.Message):
     """GameForm for outbound game state information"""
     games = messages.MessageField(GameForm, 1, repeated=True)
 
+class GameHistoryForm(messages.Message):
+    """single move in game history outbound info"""
+    user_name = messages.StringField(1, required=True)
+    date = messages.StringField(2, required=True)
+    action = messages.StringField(3, required=True)
+    score = messages.IntegerField(4, required=True)
+    submission = messages.StringField(5, required=True)
+
+class AllHistoryForm(messages.Message):
+    """outbound all game history for a given user"""
+    history = messages.MessageField(GameHistoryForm, 1, repeated=True)
 
 class NewGameForm(messages.Message):
     """Used to create a new game"""
@@ -101,7 +129,6 @@ class NewGameForm(messages.Message):
     attempt_used = messages.IntegerField(3, default=0)
     score = messages.IntegerField(4, default=0)
     current_level = messages.StringField(5, default="new-game")
-
 
 class SubmitBoardForm(messages.Message):
     """Used to make a move in an existing game"""

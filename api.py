@@ -208,6 +208,9 @@ class ProgrameApi(remote.Service):
         if game.game_over:
             return game.to_form('Game already over!')
 
+        # do task stuff this will move
+        taskqueue.add(url='/tasks/push_game_history',params={'history':""})
+
         game.attempts_remaining -= 1
         game.attempts_used += 1
         current_level = levels.getLevel(game.current_level)
@@ -300,6 +303,12 @@ class ProgrameApi(remote.Service):
             average = float(total_attempts_remaining)/count
             memcache.set(MEMCACHE_MOVES_REMAINING,
                          'The average moves remaining is {:.2f}'.format(average))
+
+    @staticmethod
+    def _push_game_history(history):
+        """Populates memcache with the average moves remaining of Games"""
+        data = history
+        games = Game.query(Game.game_over == False).fetch()
 
 
 api = endpoints.api_server([ProgrameApi])

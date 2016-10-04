@@ -6,7 +6,7 @@ import logging
 
 import webapp2
 from google.appengine.api import mail, app_identity
-from api import GuessANumberApi
+from api import ProgrameApi
 
 from models import User
 
@@ -35,7 +35,15 @@ class UpdateAverageMovesRemaining(webapp2.RequestHandler):
         self.response.set_status(204)
 
 
+class pushGameHistory(webapp2.RequestHandler):
+    def post(self):
+        """Update game listing announcement in memcache."""
+        ProgrameApi._push_game_history()
+        self.response.set_status(204)
+
+
 app = webapp2.WSGIApplication([
     ('/crons/send_reminder', SendReminderEmail),
     ('/tasks/cache_average_attempts', UpdateAverageMovesRemaining),
+    ('/tasks/push_game_history', pushGameHistory)
 ], debug=True)
