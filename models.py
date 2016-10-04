@@ -79,6 +79,10 @@ class GameForm(messages.Message):
     current_level = messages.StringField(6, required=True)
     score = messages.IntegerField(7, required=True)
 
+class GameFormList(messages.Message):
+    """GameForm for outbound game state information"""
+    games = messages.MessageField(GameForm, 1, repeated=True)
+
 
 class NewGameForm(messages.Message):
     """Used to create a new game"""

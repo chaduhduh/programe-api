@@ -16,7 +16,7 @@ import json
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
-    ScoreForms, LevelForm
+    ScoreForms, LevelForm, GameFormList
 from utils import get_by_urlsafe
 
 
@@ -24,6 +24,9 @@ levels = Levels()
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),
+    )
+GET_GAMES_REQUEST = endpoints.ResourceContainer(
+    username=messages.StringField(1),
     )
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
     level_name=messages.StringField(1),
@@ -49,7 +52,7 @@ MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
 
 @endpoints.api(name='programe', version='v1')
 class ProgrameApi(remote.Service):
-    """Game API"""
+    """Configures and Manages Programe users, games, levels, and game settings."""
 
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=StringMessage,
@@ -104,6 +107,25 @@ class ProgrameApi(remote.Service):
             raise endpoints.NotFoundException('Game not found!')
 
 
+    @endpoints.method(request_message=GET_GAMES_REQUEST,
+                      response_message=GameFormList,
+                      path='games/{username}',
+                      name='get_games',
+                      http_method='GET')
+    def get_games(self, request):
+        """Return the current game state."""
+        user = User.query(User.name == request.username).get()
+        if not user:
+          raise endpoints.NotFoundException('No User Found.')
+
+        games = Game.query(Game.user == user.key)
+        if not games:
+            raise endpoints.NotFoundException('No Games Found.')
+
+        games_list = [ game.to_form("") for game in games]
+        return GameFormList(games=games_list)
+            
+
     @endpoints.method(request_message=DELETE_GAME_REQUEST,
                       response_message=StringMessage,
                       path='game',
@@ -120,7 +142,7 @@ class ProgrameApi(remote.Service):
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if not game or user.name is not game.user.get().name:
           raise endpoints.NotFoundException(
-                    'Unable to delete or game does not exist - ' + game_user_name_name)
+                    'Unable to delete or game does not exist')
         # do delete
 
         game.key.delete()
