@@ -20,7 +20,7 @@ class SendReminderEmail(webapp2.RequestHandler):
         print "seiding email"
         users = User.query(User.email != None)
         for user in users:
-            history = GameHistory.query(GameHistory.user == user.key, GameHistory.program_compiled == False)    # if user has failed a level encourage them
+            history = GameHistory.query(GameHistory.user == user.key, GameHistory.program_compiled == False).get()    # if user has failed a level encourage them
             if history:
                 subject = 'This is a reminder!'
                 body = 'Hello {}, try out Guess A Number!'.format(user.name)
