@@ -10,13 +10,15 @@ import endpoints
 from protorpc import remote, messages
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
+from datetime import datetime
 from Level import All_Levels as Levels
 from Level import Level as Level
 import json
 
 from models import User, Game, Win
 from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
-    WinForms, LevelForm, GameFormList, RankForm
+    WinForms, LevelForm, GameFormList, RankForm, GameHistory, AllHistoryForm,\
+    GameHistoryForm
 from utils import get_by_urlsafe
 
 
@@ -26,6 +28,9 @@ GET_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),
     )
 GET_GAMES_REQUEST = endpoints.ResourceContainer(
+    username=messages.StringField(1),
+    )
+GET_GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
     username=messages.StringField(1),
     )
 GET_HIGH_SCORE_REQUEST = endpoints.ResourceContainer(
@@ -76,16 +81,16 @@ class ProgrameApi(remote.Service):
     @endpoints.method(request_message=NEW_GAME_REQUEST,
                       response_message=GameForm,
                       path='game',
-                      name='new_game',
+                      name='create_game',
                       http_method='POST')
-    def new_game(self, request):
+    def create_game(self, request):
         """Creates new game"""
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
         try:
-            game = Game.new_game(user.key, request.attempts_remaining, request.score)
+            game = Game.create_game(user.key, request.attempts_remaining, request.score)
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
@@ -139,16 +144,9 @@ class ProgrameApi(remote.Service):
                       http_method='GET')
     def get_high_scores(self, request):
         """Return the scoreboard. Optional: number_of_results limiter"""
-        number_of_results = request.number_of_results or 10
-        all_wins = Win.query(limit=number_of_results).order(-Win.score, Win.attempts_used) or []
+        number_of_results = int(request.number_of_results) or 10
+        all_wins = Win.query().order(-Win.score, Win.attempts_used).fetch(number_of_results) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
-       
-
-        games = Game.query(Game.user == user.key)
-        if not games:
-            raise endpoints.NotFoundException('No Games Found.')
-        games_list = [game.to_form("") for game in games] or []
-        return GameFormList(games=games_list)
 
 
     # get_user_ranks
@@ -171,7 +169,24 @@ class ProgrameApi(remote.Service):
 
 
     # get_game_history - store guess attempt with level + date
-            
+
+    @endpoints.method(request_message=GET_GAME_HISTORY_REQUEST,
+                      response_message=AllHistoryForm,
+                      path='games/history/{username}',
+                      name='get_game_history',
+                      http_method='GET')
+    def get_game_history(self, request):
+        """Return the current game state."""
+        user = User.query(User.name == request.username).get()
+        if not user:
+          raise endpoints.NotFoundException('No User Found.')
+
+        history = GameHistory.query(GameHistory.user == user.key)
+        if not history:
+            raise endpoints.NotFoundException('No History Found.')
+        history_list = [item.to_form() for item in history] or []
+        return AllHistoryForm(history=history_list)
+
 
     @endpoints.method(request_message=DELETE_GAME_REQUEST,
                       response_message=StringMessage,
@@ -208,9 +223,6 @@ class ProgrameApi(remote.Service):
         if game.game_over:
             return game.to_form('Game already over!')
 
-        # do task stuff this will move
-        taskqueue.add(url='/tasks/push_game_history',params={'history':""})
-
         game.attempts_remaining -= 1
         game.attempts_used += 1
         current_level = levels.getLevel(game.current_level)
@@ -218,6 +230,16 @@ class ProgrameApi(remote.Service):
         if current_level is False:
           current_level = levels.getLevelByIndex(0)
           game.current_level = current_level.getName()
+
+        # do task stuff this will move
+        history_data = { 
+            'user': game.user.get().name,
+            'score': game.score,
+            'action': 'program ran', 
+            'submission': request.solution_attempt,
+            'program_compiled' : current_level.isSolution(request.solution_attempt)
+            }
+        taskqueue.add(url='/tasks/push_game_history',params=history_data)
 
         if not current_level.isSolution(request.solution_attempt):
           game.put()
@@ -305,10 +327,15 @@ class ProgrameApi(remote.Service):
                          'The average moves remaining is {:.2f}'.format(average))
 
     @staticmethod
-    def _push_game_history(history):
-        """Populates memcache with the average moves remaining of Games"""
-        data = history
-        games = Game.query(Game.game_over == False).fetch()
+    def _push_game_history(request):
+        """Pushes history"""
+        print request['user']
+        user = User.query(User.name==request['user']).get()
+        if not user:
+          return False
+        history = GameHistory(user=user.key, date=datetime.utcnow(), action=request['action'], 
+                              score=int(request['score']), submission=request['submission'], result=request['result'])
+        history.put()
 
 
 api = endpoints.api_server([ProgrameApi])

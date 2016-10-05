@@ -29,7 +29,7 @@ class Game(ndb.Model):
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
-    def new_game(self, user, attempts_remaining,score=0):
+    def create_game(self, user, attempts_remaining,score=0):
         """Creates and returns a new game"""
         game = Game(user=user,
                     attempts_remaining=attempts_remaining, score=score)
@@ -66,15 +66,20 @@ class GameHistory(ndb.Model):
     action = ndb.StringProperty(required=True)
     score = ndb.IntegerProperty(required=True)
     submission = ndb.StringProperty(required=True)
+    result = ndb.StringProperty(required=True)
 
-    def to_form(self, submission):
+    def to_form(self):
         """Returns a GameForm representation of the Game"""
-        history = HistoryForm()
+        history = GameHistoryForm()
         history.user_name = self.user.get().name
-        history.date = self.date
+        history.date = str(self.date)
         history.action = self.action
         history.score = self.score
         history.submission = self.submission
+        if self.result.decode('utf_8') == 'True':
+        	history.result = True
+        else:
+        	history.result = False
         return history
 
 class Win(ndb.Model):
@@ -117,6 +122,7 @@ class GameHistoryForm(messages.Message):
     action = messages.StringField(3, required=True)
     score = messages.IntegerField(4, required=True)
     submission = messages.StringField(5, required=True)
+    result = messages.BooleanField(6, required=True)
 
 class AllHistoryForm(messages.Message):
     """outbound all game history for a given user"""

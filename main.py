@@ -38,7 +38,15 @@ class UpdateAverageMovesRemaining(webapp2.RequestHandler):
 class pushGameHistory(webapp2.RequestHandler):
     def post(self):
         """Update game listing announcement in memcache."""
-        ProgrameApi._push_game_history()
+        history_data = { 
+            'user': self.request.get("user").decode('utf_8'),
+            'score': self.request.get("score").decode('utf_8'),
+            'action': self.request.get("action").decode('utf_8'), 
+            'submission': self.request.get("submission").decode('utf_8'),
+            'program_compiled' : self.request.get("program_compiled").decode('utf_8'),
+            'result' : self.request.get("result").decode('utf_8')
+            }
+        ProgrameApi._push_game_history(history_data)
         self.response.set_status(204)
 
 
