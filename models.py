@@ -18,7 +18,6 @@ class User(ndb.Model):
     name = ndb.StringProperty(required=True)
     email =ndb.StringProperty()
 
-
 class Game(ndb.Model):
     """Game object"""
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)

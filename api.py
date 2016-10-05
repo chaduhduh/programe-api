@@ -97,9 +97,6 @@ class ProgrameApi(remote.Service):
         # Use a task queue to update the average attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
-
-        # TODO: do this
-        # taskqueue.add(url='/tasks/cache_average_attempts')
         return game.to_form('Good luck playing programe')
 
 
@@ -109,7 +106,7 @@ class ProgrameApi(remote.Service):
                       name='get_game',
                       http_method='GET')
     def get_game(self, request):
-        """Return the current game state."""
+        """Returns the current game state."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
             return game.to_form('Time to make a move!')
@@ -123,7 +120,7 @@ class ProgrameApi(remote.Service):
                       name='get_games',
                       http_method='GET')
     def get_games(self, request):
-        """Return the current game state."""
+        """Returns a list of all games for a given user"""
         user = User.query(User.name == request.username).get()
         if not user:
           raise endpoints.NotFoundException('No User Found.')
@@ -143,7 +140,7 @@ class ProgrameApi(remote.Service):
                       name='get_high_scores',
                       http_method='GET')
     def get_high_scores(self, request):
-        """Return the scoreboard. Optional: number_of_results limiter"""
+        """Returns the scoreboard. Optional: number_of_results limiter"""
         number_of_results = int(request.number_of_results) or 10
         all_wins = Win.query().order(-Win.score, Win.attempts_used).fetch(number_of_results) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
@@ -156,7 +153,7 @@ class ProgrameApi(remote.Service):
                       name='get_user_ranks',
                       http_method='GET')
     def get_ranks_scores(self, request):
-        """returns list of all top players by rank"""
+        """Returns list of all top players by rank"""
         user_wins = []
         users = User.query()
         for user in users:
@@ -176,7 +173,8 @@ class ProgrameApi(remote.Service):
                       name='get_game_history',
                       http_method='GET')
     def get_game_history(self, request):
-        """Return the current game state."""
+        """Returns all game history for a given user, used to view an 'instant \
+           replay' of their game and top ranked games."""
         user = User.query(User.name == request.username).get()
         if not user:
           raise endpoints.NotFoundException('No User Found.')
@@ -217,7 +215,7 @@ class ProgrameApi(remote.Service):
                       name='submit_board',
                       http_method='PUT')
     def submit_board(self, request):
-        """Makes a move. Returns a game state with message"""
+        """validates submitted solution then pushes game history"""
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game.game_over:
@@ -272,7 +270,7 @@ class ProgrameApi(remote.Service):
                       name='get_wins',
                       http_method='GET')
     def get_wins(self, request):
-        """Return all wins"""
+        """Returns all wins"""
         all_wins = Win.query() or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
@@ -292,22 +290,13 @@ class ProgrameApi(remote.Service):
         return WinForms(wins=[win.to_form() for win in all_wins])
 
 
-    @endpoints.method(response_message=StringMessage,
-                      path='games/average_attempts',
-                      name='get_average_attempts_remaining',
-                      http_method='GET')
-    def get_average_attempts(self, request):
-        """Get the cached average moves remaining"""
-        return StringMessage(message=memcache.get(MEMCACHE_MOVES_REMAINING) or '')
-
-
     @endpoints.method(request_message=GET_LEVEL_REQUEST,
                       response_message=LevelForm,
                       path='level/{level_name}',
                       name='get_level',
                       http_method='GET')
     def get_level(self, request):
-        """Return the current game state."""
+        """Returns a single level for the given level name"""
         level = levels.getLevel(str(request.level_name));
         if not level:
           raise endpoints.NotFoundException(
@@ -316,20 +305,8 @@ class ProgrameApi(remote.Service):
 
 
     @staticmethod
-    def _cache_average_attempts():
-        """Populates memcache with the average moves remaining of Games"""
-        games = Game.query(Game.game_over == False).fetch()
-        if games:
-            count = len(games)
-            total_attempts_remaining = sum([game.attempts_remaining
-                                        for game in games])
-            average = float(total_attempts_remaining)/count
-            memcache.set(MEMCACHE_MOVES_REMAINING,
-                         'The average moves remaining is {:.2f}'.format(average))
-
-    @staticmethod
     def _push_game_history(request):
-        """Pushes history"""
+        """Pushes history for the given user"""
         user = User.query(User.name==request['user']).get()
         if not user:
           return False

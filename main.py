@@ -28,13 +28,6 @@ class SendReminderEmail(webapp2.RequestHandler):
                            body)
 
 
-class UpdateAverageMovesRemaining(webapp2.RequestHandler):
-    def post(self):
-        """Update game listing announcement in memcache."""
-        GuessANumberApi._cache_average_attempts()
-        self.response.set_status(204)
-
-
 class pushGameHistory(webapp2.RequestHandler):
     def post(self):
         """Update game listing announcement in memcache."""
@@ -52,6 +45,5 @@ class pushGameHistory(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/crons/send_reminder', SendReminderEmail),
-    ('/tasks/cache_average_attempts', UpdateAverageMovesRemaining),
     ('/tasks/push_game_history', pushGameHistory)
 ], debug=True)
