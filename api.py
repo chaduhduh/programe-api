@@ -94,9 +94,6 @@ class ProgrameApi(remote.Service):
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
-        # Use a task queue to update the average attempts remaining.
-        # This operation is not needed to complete the creation of a new game
-        # so it is performed out of sequence.
         return game.to_form('Good luck playing programe')
 
 
@@ -215,7 +212,7 @@ class ProgrameApi(remote.Service):
                       name='submit_board',
                       http_method='PUT')
     def submit_board(self, request):
-        """validates submitted solution then pushes game history"""
+        """Validates submitted solution then pushes game history"""
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game.game_over:

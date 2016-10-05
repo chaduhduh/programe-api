@@ -61,7 +61,7 @@ class Game(ndb.Model):
 class GameHistory(ndb.Model):
     """History object"""
     user = ndb.KeyProperty(required=True, kind='User')
-    date = ndb.DateProperty(required=True)
+    date = ndb.DateProperty(required=True)   #  auto_now_add=True
     action = ndb.StringProperty(required=True)
     score = ndb.IntegerProperty(required=True)
     submission = ndb.StringProperty(required=True)
@@ -79,24 +79,6 @@ class GameHistory(ndb.Model):
         history.level = self.level
     	history.program_compiled = self.program_compiled
         return history
-
-class Win(ndb.Model):
-    """Score object"""
-    user = ndb.KeyProperty(required=True, kind='User')
-    date = ndb.DateProperty(required=True)
-    won = ndb.BooleanProperty(required=True)
-    attempts_used = ndb.IntegerProperty(required=True)
-    score = ndb.IntegerProperty(required=True)
-
-    def to_form(self):
-        return WinForm(user_name=self.user.get().name, won=self.won,
-                         date=str(self.date), attempts_used=self.attempts_used, score=self.score)
-
-    def to_rank(self, rank_index):
-    	return Rank(user_name=self.user.get().name, date=str(self.date), 
-    				attempts_used=self.attempts_used, score=self.score, rank=rank_index)
-
-
 
 class GameForm(messages.Message):
     """GameForm for outbound game state information"""
@@ -139,6 +121,21 @@ class SubmitBoardForm(messages.Message):
     """Used to make a move in an existing game"""
     solution_attempt = messages.StringField(1, required=True)
 
+class Win(ndb.Model):
+    """Score object"""
+    user = ndb.KeyProperty(required=True, kind='User')
+    date = ndb.DateProperty(required=True)
+    won = ndb.BooleanProperty(required=True)
+    attempts_used = ndb.IntegerProperty(required=True)
+    score = ndb.IntegerProperty(required=True)
+
+    def to_form(self):
+        return WinForm(user_name=self.user.get().name, won=self.won,
+                         date=str(self.date), attempts_used=self.attempts_used, score=self.score)
+
+    def to_rank(self, rank_index):
+    	return Rank(user_name=self.user.get().name, date=str(self.date), 
+    				attempts_used=self.attempts_used, score=self.score, rank=rank_index)
 
 class WinForm(messages.Message):
     """WinForm for outbound Win information ..scoreboard perhaps?"""
@@ -151,7 +148,6 @@ class WinForm(messages.Message):
 class WinForms(messages.Message):
     """Return multiple WinForms"""
     wins = messages.MessageField(WinForm, 1, repeated=True)
-
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""

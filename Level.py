@@ -71,10 +71,6 @@ class Level():
 
 
 
-
-
-
-
 class All_Levels():
 
     
@@ -120,6 +116,27 @@ class All_Levels():
         ]
     });
     levels.append(level_two)
+
+    # Level Three
+    level_three = Level()
+    level_three.setName("level_three")
+    level_three.setPieces(["start,return,current_value,end"]);
+    level_three.setSolutions(["start,return,current_value,end"]);
+    level_three.setSolutionScore(20);
+    level_three.setBoardStructure({
+        "rows" : [
+             {
+                "pieces" : ["start"]
+            },
+            {
+                "pieces" : ["return","current_value"]
+            },
+            {
+                "pieces" : ["end"]
+            }
+        ]
+    });
+    levels.append(level_three)
 
 
     def getLevel(self, level_name):
