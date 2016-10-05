@@ -237,7 +237,8 @@ class ProgrameApi(remote.Service):
             'score': game.score,
             'action': 'program ran', 
             'submission': request.solution_attempt,
-            'program_compiled' : current_level.isSolution(request.solution_attempt)
+            'program_compiled' : current_level.isSolution(request.solution_attempt),
+            'level' : game.current_level
             }
         taskqueue.add(url='/tasks/push_game_history',params=history_data)
 
@@ -329,12 +330,18 @@ class ProgrameApi(remote.Service):
     @staticmethod
     def _push_game_history(request):
         """Pushes history"""
-        print request['user']
         user = User.query(User.name==request['user']).get()
         if not user:
           return False
+
+        if request['program_compiled'].decode('utf_8') == 'True':
+          request['program_compiled'] = True
+        else:
+          request['program_compiled'] = False
         history = GameHistory(user=user.key, date=datetime.utcnow(), action=request['action'], 
-                              score=int(request['score']), submission=request['submission'], result=request['result'])
+                              score=int(request['score']), submission=request['submission'], program_compiled=request['program_compiled'],
+                              level=request['level']
+                              )
         history.put()
 
 

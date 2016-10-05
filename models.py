@@ -66,7 +66,8 @@ class GameHistory(ndb.Model):
     action = ndb.StringProperty(required=True)
     score = ndb.IntegerProperty(required=True)
     submission = ndb.StringProperty(required=True)
-    result = ndb.StringProperty(required=True)
+    program_compiled = ndb.BooleanProperty(required=True)
+    level = ndb.StringProperty(required=True)
 
     def to_form(self):
         """Returns a GameForm representation of the Game"""
@@ -76,10 +77,8 @@ class GameHistory(ndb.Model):
         history.action = self.action
         history.score = self.score
         history.submission = self.submission
-        if self.result.decode('utf_8') == 'True':
-        	history.result = True
-        else:
-        	history.result = False
+        history.level = self.level
+    	history.program_compiled = self.program_compiled
         return history
 
 class Win(ndb.Model):
@@ -122,7 +121,8 @@ class GameHistoryForm(messages.Message):
     action = messages.StringField(3, required=True)
     score = messages.IntegerField(4, required=True)
     submission = messages.StringField(5, required=True)
-    result = messages.BooleanField(6, required=True)
+    program_compiled = messages.BooleanField(6, required=True)
+    level = messages.StringField(7, required=True)
 
 class AllHistoryForm(messages.Message):
     """outbound all game history for a given user"""
