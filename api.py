@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-`
-"""api.py - Create and configure the Game API exposing the resources.
-This can also contain game logic. For more complex games it would be wise to
-move game logic to another file. Ideally the API will be simple, concerned
-primarily with communication to/from the API's users."""
+"""Programe API - Backend interface for ProGrAME
+  
+  Program is a puzzle game that helps to teach some basic programming logic. Programe-api
+  serves as an interface to manage games, levels and users.
+"""
 
+
+# imports
 
 import logging
 import endpoints
@@ -14,13 +17,14 @@ from datetime import datetime
 from Level import All_Levels as Levels
 from Level import Level as Level
 import json
-
-from models import User, Game, Win
+from models import User, Game, Win, GameHistory
 from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
-    WinForms, LevelForm, GameFormList, RankForm, GameHistory, AllHistoryForm,\
+    WinForms, LevelForm, GameFormList, RankForm, AllHistoryForm,\
     GameHistoryForm
 from utils import get_by_urlsafe
 
+
+# declarations
 
 levels = Levels()
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
@@ -53,14 +57,14 @@ DELETE_GAME_REQUEST = endpoints.ResourceContainer(
     )
 
 
-
-
-MEMCACHE_MOVES_REMAINING = 'MOVES_REMAINING'
-
+# Programe Api
 
 @endpoints.api(name='programe', version='v1')
 class ProgrameApi(remote.Service):
     """Configures and Manages Programe users, games, levels, and game settings."""
+
+
+    # create user
 
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=StringMessage,
@@ -68,7 +72,8 @@ class ProgrameApi(remote.Service):
                       name='create_user',
                       http_method='POST')
     def create_user(self, request):
-        """Create a User. Requires a unique username"""
+        """Creates a new User. Requires a unique username"""
+
         if User.query(User.name == request.user_name).get():
             raise endpoints.ConflictException(
                     'A User with that name already exists!')
@@ -78,13 +83,16 @@ class ProgrameApi(remote.Service):
                 request.user_name))
 
 
+    # create game
+
     @endpoints.method(request_message=NEW_GAME_REQUEST,
                       response_message=GameForm,
                       path='game',
                       name='create_game',
                       http_method='POST')
     def create_game(self, request):
-        """Creates new game"""
+        """Creates new game for a given user"""
+
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
@@ -97,19 +105,25 @@ class ProgrameApi(remote.Service):
         return game.to_form('Good luck playing programe')
 
 
+    # get game
+
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
                       name='get_game',
                       http_method='GET')
     def get_game(self, request):
-        """Returns the current game state."""
+        """Returns the current game state including current level, score, and \
+        attempts remaining"""
+
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
             return game.to_form('Time to make a move!')
         else:
             raise endpoints.NotFoundException('Game not found!')
 
+
+    # get all games
 
     @endpoints.method(request_message=GET_GAMES_REQUEST,
                       response_message=GameFormList,
@@ -118,6 +132,7 @@ class ProgrameApi(remote.Service):
                       http_method='GET')
     def get_games(self, request):
         """Returns a list of all games for a given user"""
+
         user = User.query(User.name == request.username).get()
         if not user:
           raise endpoints.NotFoundException('No User Found.')
@@ -129,7 +144,7 @@ class ProgrameApi(remote.Service):
         return GameFormList(games=games_list)
 
 
-    # get_high_scores
+    # get high scores
 
     @endpoints.method(request_message=GET_HIGH_SCORE_REQUEST,
                       response_message=WinForms,
@@ -137,13 +152,14 @@ class ProgrameApi(remote.Service):
                       name='get_high_scores',
                       http_method='GET')
     def get_high_scores(self, request):
-        """Returns the scoreboard. Optional: number_of_results limiter"""
+        """Returns 'the scoreboard'. Optional: number_of_results limiter"""
+
         number_of_results = int(request.number_of_results) or 10
         all_wins = Win.query().order(-Win.score, Win.attempts_used).fetch(number_of_results) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
 
-    # get_user_ranks
+    # get user ranks
 
     @endpoints.method(response_message=RankForm,
                       path='user/ranks',
@@ -151,6 +167,7 @@ class ProgrameApi(remote.Service):
                       http_method='GET')
     def get_ranks_scores(self, request):
         """Returns list of all top players by rank"""
+
         user_wins = []
         users = User.query()
         for user in users:
@@ -162,7 +179,7 @@ class ProgrameApi(remote.Service):
         return RankForm(ranks=user_highscores)
 
 
-    # get_game_history - store guess attempt with level + date
+    # get game history
 
     @endpoints.method(request_message=GET_GAME_HISTORY_REQUEST,
                       response_message=AllHistoryForm,
@@ -172,6 +189,7 @@ class ProgrameApi(remote.Service):
     def get_game_history(self, request):
         """Returns all game history for a given user, used to view an 'instant \
            replay' of their game and top ranked games."""
+
         user = User.query(User.name == request.username).get()
         if not user:
           raise endpoints.NotFoundException('No User Found.')
@@ -183,6 +201,8 @@ class ProgrameApi(remote.Service):
         return AllHistoryForm(history=history_list)
 
 
+    # delete game
+
     @endpoints.method(request_message=DELETE_GAME_REQUEST,
                       response_message=StringMessage,
                       path='game',
@@ -190,6 +210,7 @@ class ProgrameApi(remote.Service):
                       http_method='DELETE')
     def delete_game(self, request):
         """Deletes an existing game"""
+
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
@@ -205,6 +226,8 @@ class ProgrameApi(remote.Service):
         game.key.delete()
         return StringMessage(message="Game deleted")
 
+
+    # submit board
 
     @endpoints.method(request_message=SUBMIT_BOARD_REQUEST,
                       response_message=GameForm,
@@ -262,15 +285,20 @@ class ProgrameApi(remote.Service):
             return game.to_form("Program Compiled!")
 
 
+    # get wins - aka completed game
+
     @endpoints.method(response_message=WinForms,
                       path='wins',
                       name='get_wins',
                       http_method='GET')
     def get_wins(self, request):
         """Returns all wins"""
+
         all_wins = Win.query() or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
+
+    # get user wins
 
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=WinForms,
@@ -279,6 +307,7 @@ class ProgrameApi(remote.Service):
                       http_method='GET')
     def get_user_wins(self, request):
         """Returns all of an individual User's wins"""
+
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
@@ -286,6 +315,8 @@ class ProgrameApi(remote.Service):
         all_wins = Win.query(Win.user == user.key) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
+    
+    # get level
 
     @endpoints.method(request_message=GET_LEVEL_REQUEST,
                       response_message=LevelForm,
@@ -293,7 +324,9 @@ class ProgrameApi(remote.Service):
                       name='get_level',
                       http_method='GET')
     def get_level(self, request):
-        """Returns a single level for the given level name"""
+        """Returns a single level for the given level name, this is used\
+        to create the UI"""
+
         level = levels.getLevel(str(request.level_name));
         if not level:
           raise endpoints.NotFoundException(
@@ -301,13 +334,15 @@ class ProgrameApi(remote.Service):
         return LevelForm(name=level.getName(), pieces=json.dumps(level.getPieces()), solutions=str(level.getSolutions()), board_structure=str(level.getBoardStructure()))
 
 
+    # push game history
+
     @staticmethod
     def _push_game_history(request):
         """Pushes history for the given user"""
+
         user = User.query(User.name==request['user']).get()
         if not user:
           return False
-
         if request['program_compiled'].decode('utf_8') == 'True':
           request['program_compiled'] = True
         else:
@@ -318,5 +353,7 @@ class ProgrameApi(remote.Service):
                               )
         history.put()
 
+
+# start api server with our api objects
 
 api = endpoints.api_server([ProgrameApi])
