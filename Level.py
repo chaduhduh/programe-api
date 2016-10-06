@@ -1,4 +1,4 @@
-""" Levels - logical design of each level.
+""" Levels - logical design of single level and game levels
 
     These definitions will propegate to each platform and the ui will be
     built from this accordingly.
@@ -6,7 +6,7 @@
 
 
 class Level():
-    """  """
+    """Defines a Level"""
     
     _name = "new-game"
     _pieces = []
@@ -60,35 +60,37 @@ class Level():
         return self._solution_score or 0
 
 
-
     # functions
 
     def isSolution(self, str):
+        """returns true if provided solution matches level solution"""
+
         for solution in self.getSolutions():
           if solution == str:
             return True
         return False
 
 
-
 class All_Levels():
+    """ stores levels and defines structure for a game.
 
+        This defines how multiple levels come together. Also provides \
+        some various logic related to levels such as getNextLevel and getLevelByIndex
+    """
     
     levels = []
 
-    # Level One
-    level_one = Level()
+    level_one = Level()                         # Level One
     level_one.setName("level_one")
     level_one.setPieces(["start,print,game,end"]);
     level_one.setSolutions(["start,print,game,end"]);
     level_one.setSolutionScore(10);
     level_one.setBoardStructure({
-        "rows" : [
-             {
+        "rows" : [{
                 "pieces" : ["start"]
             },
             {
-                "pieces" : [],       # this is how nested rows are defined,
+                "pieces" : [],                   # this is how nested rows are defined,
                 "rows" : []
             },
             {
@@ -99,8 +101,7 @@ class All_Levels():
     levels.append(level_one)
 
 
-    # Level Two
-    level_two = Level()
+    level_two = Level()                           # Level Two
     level_two.setName("level_two")
     level_two.setPieces(["start,end"]);
     level_two.setSolutions(["start,end"]);
@@ -147,12 +148,18 @@ class All_Levels():
                 return level
         return False
 
+
     def getLevelByIndex(self, index):
+        """ returns a specific level by index """
+
         if self.levels[index]:
             return self.levels[index]
         return self.levels[0]
 
+
     def getNextLevel(self, current_level_name):
+         """ returns the next level after a given level name"""
+
         index = 0
         for level in self.levels:
             index += 1
