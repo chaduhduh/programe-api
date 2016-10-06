@@ -1,51 +1,62 @@
 #!/usr/bin/env python
+""" Handlers for cron jobs and tasks
+    
+    Contains functions for various cron jobs and tasks associated \
+    with programe-api. 
+"""
 
-"""main.py - This file contains handlers that are called by taskqueue and/or
-cronjobs."""
+
+# imports
+
 import logging
-
 import webapp2
 from google.appengine.api import mail, app_identity
 from api import ProgrameApi
 from datetime import datetime, timedelta
-
 from models import User, GameHistory
 
 
+# crons
+
 class SendReminderEmail(webapp2.RequestHandler):
     def get(self):
-        """Send a reminder email to each User with an email about games.
-        Called every hour using a cron job"""
+        """Send an email to any users who have a failed game each day"""
+
         app_id = app_identity.get_application_id()
-        print "seiding email"
         users = User.query(User.email != None)
         for user in users:
-            history = GameHistory.query(GameHistory.user == user.key, GameHistory.program_compiled == False).get()    # if user has failed a level encourage them
+             # if user has failed a level encourage them
+
+            history = GameHistory.query(GameHistory.user == user.key, \
+                                        GameHistory.program_compiled == False).get()   
             if history:
                 subject = 'This is a reminder!'
                 body = 'Hello {}, try out Guess A Number!'.format(user.name)
-                # This will send test emails, the arguments to send_mail are:
-                # from, to, subject, body
                 mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
                                user.email,
                                subject,
                                body)
 
 
+# tasks
+
 class pushGameHistory(webapp2.RequestHandler):
     def post(self):
-        """Update game listing announcement in memcache."""
-        history_data = { 
+        """Push the current move or action into our game history,\
+        since we dont rely on history we can push it into the task queue."""
+
+        ProgrameApi._push_game_history(
             'user': self.request.get("user"),
             'score': self.request.get("score"),
             'action': self.request.get("action"), 
             'submission': self.request.get("submission"),
             'program_compiled' : self.request.get("program_compiled"),
             'level' : self.request.get("level")
-            }
-        ProgrameApi._push_game_history(history_data)
+            )
         self.response.set_status(204)
 
+
+# register routes for crons and tasks
 
 app = webapp2.WSGIApplication([
     ('/crons/send_reminder', SendReminderEmail),
