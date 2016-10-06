@@ -158,7 +158,7 @@ class All_Levels():
 
 
     def getNextLevel(self, current_level_name):
-         """ returns the next level after a given level name"""
+        """ returns the next level after a given level name """
 
         index = 0
         for level in self.levels:
