@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-`
-"""Programe API - Backend interface for ProGrAME
+"""Programe API - Backend interface for ProGrAME - chaduhduh/ProGrAME
   
-  Program is a puzzle game that helps to teach some basic programming logic. Programe-api
+  Programe is a puzzle game that helps to teach some basic programming logic. Programe-api
   serves as an interface to manage games, levels and users.
 """
 
@@ -53,7 +53,7 @@ USER_REQUEST = endpoints.ResourceContainer(
     )
 DELETE_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),
-    user_name=messages.StringField(2)
+    username=messages.StringField(2)
     )
 
 
@@ -165,7 +165,7 @@ class ProgrameApi(remote.Service):
                       path='user/ranks',
                       name='get_user_ranks',
                       http_method='GET')
-    def get_ranks_scores(self, request):
+    def get_user_ranks(self, request):
         """Returns list of all top players by rank"""
 
         user_wins = []
@@ -211,7 +211,7 @@ class ProgrameApi(remote.Service):
     def delete_game(self, request):
         """Deletes an existing game"""
 
-        user = User.query(User.name == request.user_name).get()
+        user = User.query(User.name == request.username).get()
         if not user:
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
