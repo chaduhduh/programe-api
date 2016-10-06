@@ -33,7 +33,7 @@ List of our datastore entities below. see Models.py for specific class data<br /
 
 Classes
 ===============
-<b>Level</b> - Level.py - logical design of single level and game levels. These definitions will propegate to each platform and the ui will be built from this accordingly. See Level.py for specific properties.<br />
+<b>Level</b> - Level.py - logical design of single level and game levels. These definitions will propegate to each platform and the ui will be built from this accordingly. See Level.py for specific properties. Level definitions may eventually move.<br />
 
 Methods
 ===============
