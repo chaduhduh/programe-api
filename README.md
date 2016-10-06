@@ -11,16 +11,16 @@ Cloud Endpoints
 ===============
 <b>create_user()</b> - creates a new user from username and email, requires a unique username<br />
 <b>create_game()</b> - creates a new game for the given user, see game Model for properties<br />
-<b>get_game()</b> - returns the current game state including current level, score, and attempts remaining - <String>urlsafe_game_key<br />
-<b>get_all_games()</b> - returns list of all games for a given user - Resources: <String>username<br />
-<b>get_high_scores()</b> - returns 'the scoreboard'. Resources: <Integer>number_of_results(default=10, required=False)<br />
+<b>get_game()</b> - returns the current game state including current level, score, and attempts remaining - &lt;String&gt;urlsafe_game_key<br />
+<b>get_all_games()</b> - returns list of all games for a given user - Resources: &lt;String&gt;username<br />
+<b>get_high_scores()</b> - returns 'the scoreboard'. Resources: &lt;Integer&gt;number_of_results(default=10, required=False)<br />
 <b>get_user_ranks()</b> - returns list of all top games for all users<br />
-<b>get_game_history()</b> - returns all game history for a given user, used to view an 'instant replay' of games. Resources: <String>username<br />
-<b>delete_game()</b> - deletes an existing game. Resources: <String>usersafe_game_key, <String>username<br />
-<b>submit_board()</b> - validates submitted solution then pushes move history. Resources: <String>urlsafe_game_key, <String>solution_attempt<br />
+<b>get_game_history()</b> - returns all game history for a given user, used to view an 'instant replay' of games. Resources: &lt;String&gt;username<br />
+<b>delete_game()</b> - deletes an existing game. Resources: <String>usersafe_game_key, &lt;String&gt;username<br />
+<b>submit_board()</b> - validates submitted solution then pushes move history. Resources: &lt;String&gt;urlsafe_game_key, &lt;String&gt;solution_attempt<br />
 <b>get_wins()</b> - returns all winning games (finished)<br />
 <b>get_user_wins()</b> - returns all winning games for a given user <br />
-<b>get_level()</b> - Returns a single level for the given level name, this is used to create the UI. We dont allow skipping forward or back >;). Resources: <String>level_name<br />
+<b>get_level()</b> - Returns a single level for the given level name, this is used to create the UI. We dont allow skipping forward or back >;). Resources: &lt;String&gt;level_name<br />
 
 Models
 ===============
