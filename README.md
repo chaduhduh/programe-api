@@ -1,8 +1,8 @@
 # programe-api
 
 Api built on google app engine for managing programe saved games and scores. <br />
-See https://github.com/chaduhduh/ProGrAME for game itself. To browse api explorer go<br />
-to: http://programe-api.appspot.com/_ah/api/explorer<br />
+See https://github.com/chaduhduh/ProGrAME for game itself. <br />
+To browse api explorer go to: http://programe-api.appspot.com/_ah/api/explorer<br />
 
 Programe is a puzzle game that helps to teach some basic programming logic. Programe-api serves <br />
 as an interface to manage games, levels and users.<br />
