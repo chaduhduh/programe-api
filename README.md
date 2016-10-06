@@ -1,4 +1,4 @@
-# programe-api
+# Programe-api
 
 Api built on google app engine for managing programe saved games and scores. <br />
 See https://github.com/chaduhduh/ProGrAME for game itself. <br />
