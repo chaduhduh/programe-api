@@ -7,6 +7,21 @@ To browse api explorer go to: <a href="http://programe-api.appspot.com/_ah/api/e
 Programe is a puzzle game that helps to teach some basic programming logic. Programe-api serves <br />
 as an interface to manage games, levels and users.<br />
 
+To Run
+===============
+1. Download the Google App Engine SDK for python (python is required to run App Engine SDk)<br />
+2. After install launch Google App Engine SDK<br />
+3. Clone the programe-api repo to your machine (or download the zip) to the location of your choice<br />
+3. Once App Engine is open and files are cloned click 'File>Add Existing Application' on the prompt and select the folder where you cloned the programe-api repo
+4. Set the ports or use the default settings
+5. Once the status off the app is green (green start button) local app instance has been launched! Console will also let you know when launch is complete.
+6. Click the browse button to open the url
+7. To view the api explorer navigate to "/_ah/api/explorer" relative to your app. Typically, http://localhost:{port}/_ah/api/explorer<br />
+**note** to view the api explorer on localhost you will need to launch chrome from the command line with the --unsafely-treat-insecure-origin-as-secure flag set. 
+To do this navigate to the directory you have chrome installed (find chrome.exe). And run the following command: 
+<i>"chrome.exe --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8080"</i><br />
+8. After openining chrome with the previous flag set and navigating to the "/_ah/api/explorer" directory you are ready to begin testing your endpoints!!
+
 Cloud Endpoints
 ===============
 <b>create_user()</b> - creates a new user from username and email, requires a unique username<br />
