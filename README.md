@@ -212,7 +212,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Representation of a single level (name, pieces, solutions, board_structure)
 - **Rank**
     - Representation of a single user rank (user_name, date, attempts_used, score, 
-    rank ints)
+    rank int)
 - **RankForm**
     - List of Rank
 - **StringMessage**
