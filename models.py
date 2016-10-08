@@ -16,7 +16,7 @@ class User(ndb.Model):
     """User profile"""
 
     name = ndb.StringProperty(required=True)
-    email =ndb.StringProperty()
+    email = ndb.StringProperty()
 
 
 class Game(ndb.Model):
@@ -30,14 +30,13 @@ class Game(ndb.Model):
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
-    def create_game(self, user, attempts_remaining,score=0):
+    def create_game(self, user, attempts_remaining, score=0):
         """Creates and returns a new game"""
 
         game = Game(user=user,
                     attempts_remaining=attempts_remaining, score=score)
         game.put()
         return game
-
 
     def to_form(self, message):
         """Returns a GameForm representation of the Game"""
@@ -53,16 +52,20 @@ class Game(ndb.Model):
         form.message = message
         return form
 
-
     def end_game(self, won=False):
         """Ends the game - if won is True, the player won. - if won is False,
         the player lost."""
 
         self.game_over = True
         self.put()
-         # Add the game to the score 'board'
-        game_win = Win(user=self.user,date=datetime.utcnow(),
-                       won=True,attempts_used=self.attempts_used, score=self.score)
+        # Add the game to the score 'board'
+        game_win = Win(
+                    user=self.user,
+                    date=datetime.utcnow(),
+                    won=True,
+                    attempts_used=self.attempts_used,
+                    score=self.score
+                    )
         game_win.put()
 
 
@@ -70,7 +73,7 @@ class GameHistory(ndb.Model):
     """History object"""
 
     user = ndb.KeyProperty(required=True, kind='User')
-    date = ndb.DateProperty(required=True)   #  auto_now_add=True
+    date = ndb.DateProperty(required=True)      # auto_now_add=True
     action = ndb.StringProperty(required=True)
     score = ndb.IntegerProperty(required=True)
     submission = ndb.StringProperty(required=True)
@@ -86,7 +89,7 @@ class GameHistory(ndb.Model):
         history.score = self.score
         history.submission = self.submission
         history.level = self.level
-    	history.program_compiled = self.program_compiled
+        history.program_compiled = self.program_compiled
         return history
 
 
@@ -154,11 +157,15 @@ class Win(ndb.Model):
 
     def to_form(self):
         return WinForm(user_name=self.user.get().name, won=self.won,
-                         date=str(self.date), attempts_used=self.attempts_used, score=self.score)
+                       date=str(self.date), attempts_used=self.attempts_used,
+                       score=self.score
+                       )
 
     def to_rank(self, rank_index):
-    	return Rank(user_name=self.user.get().name, date=str(self.date), 
-    				attempts_used=self.attempts_used, score=self.score, rank=rank_index)
+        return Rank(user_name=self.user.get().name, date=str(self.date),
+                    attempts_used=self.attempts_used, score=self.score,
+                    rank=rank_index
+                    )
 
 
 class WinForm(messages.Message):
@@ -193,16 +200,15 @@ class LevelForm(messages.Message):
 
 
 class Rank(messages.Message):
-	"""Defines a rank"""
+    """Defines a rank"""
 
-	user_name = messages.StringField(1, required=True)
-	date = messages.StringField(2, required=True)
-	attempts_used = messages.IntegerField(3, required=True)
-	score = messages.IntegerField(4, required=True)
-	rank = messages.IntegerField(5, required=True)
+    user_name = messages.StringField(1, required=True)
+    date = messages.StringField(2, required=True)
+    attempts_used = messages.IntegerField(3, required=True)
+    score = messages.IntegerField(4, required=True)
+    rank = messages.IntegerField(5, required=True)
 
 
 class RankForm(messages.Message):
     """List of Rank objects for output"""
     ranks = messages.MessageField(Rank, 1, repeated=True)
-
