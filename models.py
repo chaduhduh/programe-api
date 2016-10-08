@@ -132,7 +132,7 @@ class NewGameForm(messages.Message):
 
     user_name = messages.StringField(1, required=True)
     attempts_remaining = messages.IntegerField(2, default=5)
-    attempt_used = messages.IntegerField(3, default=0)
+    attempts_used = messages.IntegerField(3, default=0)
     score = messages.IntegerField(4, default=0)
     current_level = messages.StringField(5, default="new-game")
 
