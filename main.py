@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """ Handlers for cron jobs and tasks
-    
-    Contains functions for various cron jobs and tasks associated \
-    with programe-api. 
+
+    Contains functions for various cron jobs and tasks associated
+    with programe-api.
 """
 
 
@@ -23,12 +23,13 @@ class SendReminderEmail(webapp2.RequestHandler):
         """Send an email to any users who have a failed game each day"""
 
         app_id = app_identity.get_application_id()
-        users = User.query(User.email != None)
+        users = User.query(User.email is not None)
         for user in users:
-             # if user has failed a level encourage them
+            # if user has failed a level encourage them
 
-            history = GameHistory.query(GameHistory.user == user.key, \
-                                        GameHistory.program_compiled == False).get()   
+            history = GameHistory.query(
+                GameHistory.user == user.key,
+                GameHistory.program_compiled is False).get()
             if history:
                 subject = 'This is a reminder!'
                 body = 'Hello {}, try out Guess A Number!'.format(user.name)
@@ -48,10 +49,10 @@ class pushGameHistory(webapp2.RequestHandler):
         ProgrameApi._push_game_history(
             'user': self.request.get("user"),
             'score': self.request.get("score"),
-            'action': self.request.get("action"), 
+            'action': self.request.get("action"),
             'submission': self.request.get("submission"),
-            'program_compiled' : self.request.get("program_compiled"),
-            'level' : self.request.get("level")
+            'program_compiled': self.request.get("program_compiled"),
+            'level': self.request.get("level")
             )
         self.response.set_status(204)
 
