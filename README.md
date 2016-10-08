@@ -60,7 +60,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Creates a new User. user_name provided must be unique. Will 
     raise a ConflictException if a User with that user_name already exists.
     
- - **create_game**
+- **create_game**
     - Path: 'game'
     - Method: POST
     - Parameters: user_name, attempts_remaining, attempts_used, score, current_level
@@ -71,14 +71,14 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     Score and current level typically will initialize at 0 and level_one, however, 
     if continue game is needed this way you can continue from an existing point.
      
- - **get_game**
+- **get_game**
     - Path: 'game/{urlsafe_game_key}'
     - Method: GET
     - Parameters: urlsafe_game_key
     - Returns: GameForm with current game state.
     - Description: Returns the current state of a game.
 
- - **get_all_games**
+- **get_all_games**
     - Path: 'games/{username}'
     - Method: GET
     - Parameters: username
@@ -86,7 +86,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Returns a list of all games for a given user. This allows
     a sinlge user to have multiple games at the same time.
 
- - **delete_game**
+- **delete_game**
     - Path: 'game/'
     - Method: DELETE
     - Parameters: urlsafe_game_key, username
@@ -94,7 +94,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Deletes the provided game if the username and game exist. Will 
     raise a NotFoundException if the User or game does not exist.
 
- - **get_game_history**
+- **get_game_history**
     - Path: 'games/history/{username}'
     - Method: GET
     - Parameters: username
@@ -102,7 +102,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Returns all game history for a given user, used to view an 'instant 
     replay' of their game and top ranked games.
 
- - **get_level**
+- **get_level**
     - Path: 'level/{level_name}'
     - Method: GET
     - Parameters: level_name
@@ -110,7 +110,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Returns a single level for the given level name, this is used
     to create the UI
     
- - **submit_board**
+- **submit_board**
     - Path: 'game/{urlsafe_game_key}'
     - Method: PUT
     - Parameters: urlsafe_game_key, solution_attempt
@@ -120,14 +120,14 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     left to right top to bottom. Game state will be updated, move will be pushed into
     game history, and the new game state will be retuned.
     
- - **get_wins**
+- **get_wins**
     - Path: 'wins'
     - Method: GET
     - Parameters: None
     - Returns: ScoreForms.
     - Description: Returns all wins in the database (unordered).
     
- - **get_user_wins**
+- **get_user_wins**
     - Path: 'win/user/{user_name}'
     - Method: GET
     - Parameters: user_name
@@ -135,14 +135,13 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Description: Returns all Wins recorded by the provided player (unordered).
     Will raise a NotFoundException if the User does not exist.
 
- - **get_user_ranks**
+- **get_user_ranks**
     - Path: 'user/ranks'
     - Method: GET
-    - Parameters: 
     - Returns: RankForm
     - Description: Returns list of all top players by rank
 
- - **get_high_scores**
+- **get_high_scores**
     - Path: 'the-scoreboard'
     - Method: GET
     - Parameters: number_of_results(optional limiter) 
@@ -177,10 +176,10 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - getNextLevel() - accepts level_name and returns the next level in the game
 
 ##Methods
- - **_push_game_history()** 
-    - api.py - pushes history for the given user, this is invoked via task and is not invoked directly
+- **_push_game_history()** 
+    - api.py, pushes history for the given user, this is invoked via task and is not invoked directly
 - **get_by_urlsafe()** 
-    - utils.py - Returns an ndb.Model entity that the urlsafe key points to. Checks that the type of entity returned is of the correct kind.<br />
+    - utils.py, Returns an ndb.Model entity that the urlsafe key points to. Checks that the type of entity returned is of the correct kind.<br />
 
 ##Tasks/Crons  (cron.yaml, app.yaml, main.py)
  - **SendReminderEmail(/crons/send_reminder)** 
@@ -189,25 +188,25 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - invokes the _push_game_history() function to add this move to the task queue. We queue these since generally history is not needed to complete/continue playing.
 
 ##Forms Included:
- - **GameForm**
+- **GameForm**
     - Representation of a Game's state (urlsafe_key, attempts_remaining,
     attempts_used, game_over flag, message, user_name, current_level, score).
- - **GameFormList**
+- **GameFormList**
     - List of GameForms
- - **GameHistoryForm**
+- **GameHistoryForm**
     - Representation of a users history (user_name, date,
     action, score, submission, program_compiled, level).
- - **AllHistoryForm**
+- **AllHistoryForm**
     - List of GameHistoryForm
- - **NewGameForm**
+- **NewGameForm**
     - Used to create a new game (user_name, attempts_remaning, attempts_used, 
     score, current_level)
- - **SubmitBoardForm**
+- **SubmitBoardForm**
     - Inbound puzzle submission
- - **WinForm**
+- **WinForm**
     - Representation of a completed game's results (user_name, date, won flag,
     attempts_used, score).
- - **WinForms**
+- **WinForms**
     - List of WinForm
 - **LevelForms**
     - Representation of a single level (name, pieces, solutions, board_structure)
@@ -216,7 +215,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     rank ints)
 - **RankForm**
     - List of Rank
- - **StringMessage**
+- **StringMessage**
     - General purpose String container.
 
 
