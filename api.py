@@ -230,6 +230,7 @@ class ProgrameApi(remote.Service):
         game.attempts_used += 1
         current_level = levels.getLevel(game.current_level)
 
+
         if current_level is False:
             current_level = levels.getLevelByIndex(0)
             game.current_level = current_level.getName()

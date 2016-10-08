@@ -1,0 +1,37 @@
+What additional properties did you add to your models and why?
+
+Additional properties were added to the models for various reasons. Although
+similar in a basic sense to "Guess a number", at a closer look this is more complex.
+I added an additional property of current_level to the game model to track the current
+level the user was on. Since this game has more than one game board I chose to track 
+them as levels. Now the game can initialize with the appopriate level by calling getLevel. 
+I also chose to change the Score model to a Win model. In Programe, each game has a 
+running score and when the game is completed it is considered a win. Having the win class 
+called Score seemed confusing in my case as I only wanted to track completed games, meaning 
+players need to get to the last level. I also chose to add a GameHistory model rather than 
+tracking the history via complex queries. This way we can track many events and replay them 
+in the appropriate order. This serves as a means to continue games from a certain or location
+or perhaps play 'instant replays' of the users attempts.
+
+
+What were some of the trade-offs or struggles you faced when implementing the new game logic?
+
+The main struggle I faced was implementing the level system. Since I needed to have multiple 
+game boards on which users would submit varying guesses I needed an easy way to manage the 
+levels that would propegate to all platforms. I considered creating an additional datastore 
+model at first but then decided to just use a python class to define it. This way the levels
+can eventually be extended and custom levels can be created without worring about excessive 
+datastore reads and writes. For now the levels are defined in Level.py and All_levels class 
+is used to access the levels for the game. When I eventually open it up to allow custom levels
+there will be functions on the All_levels class to add and remove levels [levels.add(Level), 
+levels.remove(Level)]. This way the main levels will propegate but can then be extended to create 
+custom games. Another struggle faced on implementation was deciding on the Score model. As previously
+stated I ended up removing the Score model and adding a Win model to track users progress. Since 
+we need to know when the users finish the entire game, and when they finish each level this seemed
+to be the best approach. Win will track completed games and level progress is tracked in GameHistory.
+Having already had the UI built for this game it made it a little easier to plan out how things were
+going to be structured. I going to start working on implementing this into the front end ui using
+googles api javascript client.
+
+
+
