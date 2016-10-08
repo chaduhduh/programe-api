@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-`
 """Programe API - Backend interface for ProGrAME - chaduhduh/ProGrAME
-  
-  Programe is a puzzle game that helps to teach some basic programming logic. Programe-api
-  serves as an interface to manage games, levels and users.
+
+  Programe is a puzzle game that helps to teach some basic programming logic.
+  Programe-api serves as an interface to manage games, levels and users.
 """
 
 
@@ -38,7 +38,7 @@ GET_GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
     username=messages.StringField(1),
     )
 GET_HIGH_SCORE_REQUEST = endpoints.ResourceContainer(
-    number_of_results=messages.IntegerField(1,required=False,default=10),
+    number_of_results=messages.IntegerField(1, required=False, default=10),
     )
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
     level_name=messages.StringField(1),
@@ -61,11 +61,10 @@ DELETE_GAME_REQUEST = endpoints.ResourceContainer(
 
 @endpoints.api(name='programe', version='v1')
 class ProgrameApi(remote.Service):
-    """Configures and Manages Programe users, games, levels, and game settings."""
-
+    """Configures and Manages Programe users, games, levels,
+    and game settings."""
 
     # create user
-
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=StringMessage,
                       path='user',
@@ -82,9 +81,7 @@ class ProgrameApi(remote.Service):
         return StringMessage(message='User {} created!'.format(
                 request.user_name))
 
-
     # create game
-
     @endpoints.method(request_message=NEW_GAME_REQUEST,
                       response_message=GameForm,
                       path='game',
@@ -98,15 +95,14 @@ class ProgrameApi(remote.Service):
             raise endpoints.NotFoundException(
                     'A User with that name does not exist!')
         try:
-            game = Game.create_game(user.key, request.attempts_remaining, request.score)
+            game = Game.create_game(user.key, request.attempts_remaining,
+                                    request.score)
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')
         return game.to_form('Good luck playing programe')
 
-
     # get game
-
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
@@ -122,9 +118,7 @@ class ProgrameApi(remote.Service):
         else:
             raise endpoints.NotFoundException('Game not found!')
 
-
     # get all games
-
     @endpoints.method(request_message=GET_GAMES_REQUEST,
                       response_message=GameFormList,
                       path='games/{username}',
@@ -135,7 +129,7 @@ class ProgrameApi(remote.Service):
 
         user = User.query(User.name == request.username).get()
         if not user:
-          raise endpoints.NotFoundException('No User Found.')
+            raise endpoints.NotFoundException('No User Found.')
 
         games = Game.query(Game.user == user.key)
         if not games:
@@ -143,9 +137,7 @@ class ProgrameApi(remote.Service):
         games_list = [game.to_form("") for game in games] or []
         return GameFormList(games=games_list)
 
-
     # get high scores
-
     @endpoints.method(request_message=GET_HIGH_SCORE_REQUEST,
                       response_message=WinForms,
                       path='the-scoreboard',
@@ -155,12 +147,11 @@ class ProgrameApi(remote.Service):
         """Returns 'the scoreboard'. Optional: number_of_results limiter"""
 
         number_of_results = int(request.number_of_results) or 10
-        all_wins = Win.query().order(-Win.score, Win.attempts_used).fetch(number_of_results) or []
+        all_wins = Win.query().order(-Win.score, Win.attempts_used)\
+                              .fetch(number_of_results) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
-
     # get user ranks
-
     @endpoints.method(response_message=RankForm,
                       path='user/ranks',
                       name='get_user_ranks',
@@ -171,16 +162,14 @@ class ProgrameApi(remote.Service):
         user_wins = []
         users = User.query()
         for user in users:
-            user_wins.append(Win.query(Win.user == user.key).order(-Win.score, Win.attempts_used).get())
-
+            user_wins.append(Win.query(Win.user == user.key)
+                             .order(-Win.score, Win.attempts_used).get())
         user_highscores = []
         for i, win in enumerate(user_wins):
-          user_highscores.append(win.to_rank(i+1))
+            user_highscores.append(win.to_rank(i+1))
         return RankForm(ranks=user_highscores)
 
-
     # get game history
-
     @endpoints.method(request_message=GET_GAME_HISTORY_REQUEST,
                       response_message=AllHistoryForm,
                       path='games/history/{username}',
@@ -192,7 +181,7 @@ class ProgrameApi(remote.Service):
 
         user = User.query(User.name == request.username).get()
         if not user:
-          raise endpoints.NotFoundException('No User Found.')
+            raise endpoints.NotFoundException('No User Found.')
 
         history = GameHistory.query(GameHistory.user == user.key)
         if not history:
@@ -200,9 +189,7 @@ class ProgrameApi(remote.Service):
         history_list = [item.to_form() for item in history] or []
         return AllHistoryForm(history=history_list)
 
-
     # delete game
-
     @endpoints.method(request_message=DELETE_GAME_REQUEST,
                       response_message=StringMessage,
                       path='game',
@@ -219,16 +206,14 @@ class ProgrameApi(remote.Service):
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if not game or user.name is not game.user.get().name:
-          raise endpoints.NotFoundException(
+            raise endpoints.NotFoundException(
                     'Unable to delete or game does not exist')
         # do delete
 
         game.key.delete()
         return StringMessage(message="Game deleted")
 
-
     # submit board
-
     @endpoints.method(request_message=SUBMIT_BOARD_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
@@ -246,35 +231,37 @@ class ProgrameApi(remote.Service):
         current_level = levels.getLevel(game.current_level)
 
         if current_level is False:
-          current_level = levels.getLevelByIndex(0)
-          game.current_level = current_level.getName()
+            current_level = levels.getLevelByIndex(0)
+            game.current_level = current_level.getName()
 
         # do task stuff this will move
-        history_data = { 
+        history_data = {
             'user': game.user.get().name,
             'score': game.score,
-            'action': 'program ran', 
+            'action': 'program ran',
             'submission': request.solution_attempt,
-            'program_compiled' : current_level.isSolution(request.solution_attempt),
-            'level' : game.current_level
+            'program_compiled': current_level.isSolution(
+                                                request.solution_attempt),
+            'level': game.current_level
             }
-        taskqueue.add(url='/tasks/push_game_history',params=history_data)
+        taskqueue.add(url='/tasks/push_game_history', params=history_data)
 
         if not current_level.isSolution(request.solution_attempt):
-          game.put()
-          return game.to_form("There was a bug in your code!!")
+            game.put()
+            return game.to_form("There was a bug in your code!!")
         # solved - register score and get the next level
 
-        game.score += current_level.getSolutionScore();
+        game.score += current_level.getSolutionScore()
         game.attempts_remaining += 5
         next_level = levels.getNextLevel(current_level.getName())
-        
-        if next_level is False:    # no levels left
-          game.current_level = "Winner"
-          game.end_game(True)
-          return game.to_form("You have reached the end of the game, click to view your ranks")
 
-        game.current_level =  next_level.getName();
+        if next_level is False:    # no levels left
+            game.current_level = "Winner"
+            game.end_game(True)
+            return game.to_form("You have reached the end of the game,\
+                                  click to view your ranks")
+
+        game.current_level = next_level.getName()
         # end game or update game datad
 
         if game.attempts_remaining < 1:
@@ -284,9 +271,7 @@ class ProgrameApi(remote.Service):
             game.put()
             return game.to_form("Program Compiled!")
 
-
     # get wins - aka completed game
-
     @endpoints.method(response_message=WinForms,
                       path='wins',
                       name='get_wins',
@@ -297,9 +282,7 @@ class ProgrameApi(remote.Service):
         all_wins = Win.query() or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
-
     # get user wins
-
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=WinForms,
                       path='win/user/{user_name}',
@@ -315,9 +298,7 @@ class ProgrameApi(remote.Service):
         all_wins = Win.query(Win.user == user.key) or []
         return WinForms(wins=[win.to_form() for win in all_wins])
 
-    
     # get level
-
     @endpoints.method(request_message=GET_LEVEL_REQUEST,
                       response_message=LevelForm,
                       path='level/{level_name}',
@@ -327,32 +308,37 @@ class ProgrameApi(remote.Service):
         """Returns a single level for the given level name, this is used\
         to create the UI"""
 
-        level = levels.getLevel(str(request.level_name));
+        level = levels.getLevel(str(request.level_name))
         if not level:
-          raise endpoints.NotFoundException(
+            raise endpoints.NotFoundException(
                     'Level Not Found')
-        return LevelForm(name=level.getName(), pieces=json.dumps(level.getPieces()), solutions=str(level.getSolutions()), board_structure=str(level.getBoardStructure()))
-
+        return LevelForm(
+                  name=level.getName(),
+                  pieces=json.dumps(level.getPieces()),
+                  solutions=str(level.getSolutions()),
+                  board_structure=str(level.getBoardStructure())
+                  )
 
     # push game history
-
     @staticmethod
     def _push_game_history(request):
         """Pushes history for the given user"""
 
-        user = User.query(User.name==request['user']).get()
+        user = User.query(User.name == request['user']).get()
         if not user:
-          return False
+            return False
         if request['program_compiled'].decode('utf_8') == 'True':
-          request['program_compiled'] = True
+            request['program_compiled'] = True
         else:
-          request['program_compiled'] = False
-        history = GameHistory(user=user.key, date=datetime.utcnow(), action=request['action'], 
-                              score=int(request['score']), submission=request['submission'], program_compiled=request['program_compiled'],
-                              level=request['level']
-                              )
+            request['program_compiled'] = False
+        history = GameHistory(
+                    user=user.key, date=datetime.utcnow(),
+                    action=request['action'], score=int(request['score']),
+                    submission=request['submission'],
+                    program_compiled=request['program_compiled'],
+                    level=request['level']
+                    )
         history.put()
-
 
 # start api server with our api objects
 
