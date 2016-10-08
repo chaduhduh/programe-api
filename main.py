@@ -43,17 +43,17 @@ class SendReminderEmail(webapp2.RequestHandler):
 
 class pushGameHistory(webapp2.RequestHandler):
     def post(self):
-        """Push the current move or action into our game history,\
+        """Push the current move or action into our game history,
         since we dont rely on history we can push it into the task queue."""
 
-        ProgrameApi._push_game_history(
+        ProgrameApi._push_game_history({
             'user': self.request.get("user"),
             'score': self.request.get("score"),
             'action': self.request.get("action"),
             'submission': self.request.get("submission"),
             'program_compiled': self.request.get("program_compiled"),
             'level': self.request.get("level")
-            )
+            })
         self.response.set_status(204)
 
 
