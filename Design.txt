@@ -31,7 +31,8 @@ we need to know when the users finish the entire game, and when they finish each
 to be the best approach. Win will track completed games and level progress is tracked in GameHistory.
 Having already had the UI built for this game it made it a little easier to plan out how things were
 going to be structured. I going to start working on implementing this into the front end ui using
-googles api javascript client.
+googles api javascript client. Currently the front end is just using jquery to manage the game flow
+and doesnt store any game info.
 
 
 
