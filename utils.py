@@ -23,7 +23,7 @@ def get_by_urlsafe(urlsafe, model):
         exists.
     Raises:
         ValueError:"""
-        
+
     try:
         key = ndb.Key(urlsafe=urlsafe)
     except TypeError:
