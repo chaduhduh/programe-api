@@ -37,11 +37,14 @@ lowest number of attempts. <br />
 To see how the game is played view the live demo here: http://programe.chaddmyers.com/
 
 ## Game Scoring:
-1. Each new game a player creates keeps its own running score. 
-2. Points are achieved by correctly solving each puzzle.
-3. the level solved determines the number of points a player receives.
-4. the total score when the player reaches the last level will be the final score.
-5. Users are ranked by the highest score with the lowest number of attempts. If two users have the
+1. Each new game a player creates keeps its own running score. <br />
+2. Points are achieved by correctly solving each puzzle.<br />
+3. puzzles are decoded from top to bottom left to right. For example, the solution for the puzzle in the 
+image above would be start,print,game,end. The front end client will determine how that information is obtained
+from their puzzle board<br />
+4. the level solved determines the number of points a player receives.<br />
+5. the total score when the player reaches the last level will be the final score.<br />
+6. Users are ranked by the highest score with the lowest number of attempts. If two users have the
 same score on a game the attempts used will determine the leader. Rank will show the users best game,
 wins will show best of all games.
 
@@ -52,28 +55,29 @@ will be used to build the UI for the game. Level structure is built it standard 
 The submit_board endpoint will receive the users solution and will check that against the current levels solution. Response will
 indicate the result of the guess and will update the level accordingly. get_all_highscores (aka the scoreboard) is used to 
 build a scoreboard of the top ranking players. <br />
-Typical flow will be:
-    1. <code>create_user</code>
-    2. 'create_game'
-    3. 'get_level'
-    4. 'submit_board' 
-    5. 'get_level'
-    6. 'submit_board'
-    7. 'get_user_rank'
-    8. 'create_game' 
+Typical flow will be:<br />
+    1. <code>create_user</code><br />
+    2. <code>create_game</code><br />
+    3. <code>get_level</code><br />
+    4. <code>submit_board</code> <br />
+    5. <code>get_level</code><br />
+    6. <code>submit_board</code><br />
+    7. <code>get_user_rank</code><br />
+    8. <code>create_game</code><br />
     9. etc
 
 ## Api Usage: 
-    1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer
-    2. generate a new user using the 'create_user'
-    3. create a new game or load an existing game with the 'create_game' and 'get_game' endpoints. The create game endpoint only requires
-    5. call 'get_level' with the game level from the previous response to build out a user interface
-    4. Using the url safe key from the previous response submit a move on the board using the 'submit_board' function.
-    5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one
-    6. submit that request and the response will return the updated game and the new level!
-    7. once the user reaches the last level they will get a registered win.
-    9. 'get_user_wins' will display all wins for a given user and get_wins will display all wins.
-    10. Once some moves have been made game history can be viewed using the 'get_game_history' function
+    1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer<br />
+    2. generate a new user using the <code>create_user</code><br />
+    3. create a new game or load an existing game with the <code>create_game</code> and <code>get_game</code> endpoints. The create game endpoint only requires<br />
+    5. call <code>get_level</code> with the game level from the previous response to build out a user interface<br />
+    4. Using the url safe key from the previous response submit a move on the board using the <code>submit_board</code> function.<br />
+    5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one<br />
+    6. submit that request and the response will return the updated game and the new level!<br />
+    7. once the user reaches the last level they will get a registered win.<br />
+    9. <code>get_user_wins</code> will display all wins for a given user and get_wins will display all wins.<br />
+    10. Once some moves have been made game history can be viewed using the <code>get_game_history</code> function<br />
+    11. ** note ** currently levels are in progress. For the meantime there are only three levels. 'level_one', 'level_two', 'level_three'
     
 ##Cloud Endpoints
 - **create_user**
