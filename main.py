@@ -25,12 +25,12 @@ class SendReminderEmail(webapp2.RequestHandler):
         app_id = app_identity.get_application_id()
         users = User.query(User.email is not None)
         for user in users:
-            # if user has failed a level encourage them
+            # if user has failed a their last level
 
             history = GameHistory.query(
-                GameHistory.user == user.key,
-                GameHistory.program_compiled is False).get()
-            if history:
+                GameHistory.user == user.key)
+                .order(-GameHistory.date).get()
+            if not history.program_compiled:
                 subject = 'This is a reminder!'
                 body = 'Hello {}, try out Guess A Number!'.format(user.name)
                 mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
