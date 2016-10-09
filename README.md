@@ -69,13 +69,13 @@ Typical flow will be:<br />
 ## Api Usage: 
 1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer<br />
 2. generate a new user using the <code>create_user</code><br />
-3. create a new game or load an existing game with the <code>create_game</code> and <code>get_game</code> endpoints. The create game endpoint only requires<br />
-5. call <code>get_level</code> with the game level from the previous response to build out a user interface<br />
+3. create a new game or load an existing game with the <code>create_game</code> and <code>get_game</code> endpoints. The create game endpoint only requires a username<br />
+5. call <code>get_level</code> with the game level name from the previous response to build out a user interface<br />
 4. Using the url safe key from the previous response submit a move on the board using the <code>submit_board</code> function.<br />
 5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one<br />
 6. submit that request and the response will return the updated game and the new level!<br />
 7. once the user reaches the last level they will get a registered win.<br />
-9. <code>get_user_wins</code> will display all wins for a given user and get_wins will display all wins.<br />
+9. <code>get_user_wins</code> will display all wins for a given user and <code>get_wins</code> will display all wins.<br />
 10. Once some moves have been made game history can be viewed using the <code>get_game_history</code> function<br />
 11. ** note ** currently levels are in progress. For the meantime there are only three levels. 'level_one', 'level_two', 'level_three'
     
