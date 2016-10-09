@@ -9,21 +9,6 @@ as an interface to manage games, levels and users.<br />
 
 ![Alt text](https://raw.githubusercontent.com/chaduhduh/ProGrAME/master/images/programe-example.jpg?raw=true "Example Level")
 
-##Api Local Setup Instructions:
-1. Download the Google App Engine SDK for python (python is required to run App Engine SDk)<br />
-2. After install launch Google App Engine SDK<br />
-3. Clone the programe-api repo to your machine (or download the zip) to the location of your choice<br />
-4. Update the value of application in app.yaml to the app ID you have registered in the App Engine admin console and would like to use to host your instance of this sample.
-5. Once App Engine is open and files are cloned click 'File>Add Existing Application' on the prompt and select the folder where you cloned the programe-api repo
-6. Set the ports or use the default settings
-7. Once the status off the app is green (green start button) local app instance has been launched! Console will also let you know when launch is complete.
-8. Click the browse button to open the url, typically: http://localhost:{port}
-9. To view the api explorer navigate to "/_ah/api/explorer" relative to your app. Typically, http://localhost:{port}/_ah/api/explorer<br />
-**note** to view the api explorer on localhost you will need to launch chrome from the command line with the --unsafely-treat-insecure-origin-as-secure flag set. 
-To do this navigate to the directory you have chrome installed (find chrome.exe). And run the following command: 
-<i>"chrome.exe --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8080"</i><br />
-10. After opening chrome with the previous flag set and navigating to the "/_ah/api/explorer" directory you are ready to begin testing your endpoints!!
-
 ##Game Description:
 Programe is a an educational puzzle game that is designed to teach some basic programming 
 logic. Although intended for beginners some of the puzzles can become quite challenging! 
@@ -47,6 +32,21 @@ from their puzzle board<br />
 6. Users are ranked by the highest score with the lowest number of attempts. If two users have the
 same score on a game the attempts used will determine the leader. Rank will show the users best game,
 wins will show best of all games.
+
+##Api Local Setup Instructions:
+1. Download the Google App Engine SDK for python (python is required to run App Engine SDk)<br />
+2. After install launch Google App Engine SDK<br />
+3. Clone the programe-api repo to your machine (or download the zip) to the location of your choice<br />
+4. Update the value of application in app.yaml to the app ID you have registered in the App Engine admin console and would like to use to host your instance of this sample.
+5. Once App Engine is open and files are cloned click 'File>Add Existing Application' on the prompt and select the folder where you cloned the programe-api repo
+6. Set the ports or use the default settings
+7. Once the status off the app is green (green start button) local app instance has been launched! Console will also let you know when launch is complete.
+8. Click the browse button to open the url, typically: http://localhost:{port}
+9. To view the api explorer navigate to "/_ah/api/explorer" relative to your app. Typically, http://localhost:{port}/_ah/api/explorer<br />
+**note** to view the api explorer on localhost you will need to launch chrome from the command line with the --unsafely-treat-insecure-origin-as-secure flag set. 
+To do this navigate to the directory you have chrome installed (find chrome.exe). And run the following command: 
+<i>"chrome.exe --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8080"</i><br />
+10. After opening chrome with the previous flag set and navigating to the "/_ah/api/explorer" directory you are ready to begin testing your endpoints!!
 
 ##Api Description:
 The create_user and create_game endpoints are used to create a new user and a new game. Once a game is initialized
