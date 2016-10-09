@@ -6,6 +6,7 @@
 import logging
 from google.appengine.ext import ndb
 import endpoints
+from protorpc import messages
 
 
 # methods
@@ -40,3 +41,9 @@ def get_by_urlsafe(urlsafe, model):
     if not isinstance(entity, model):
         raise ValueError('Incorrect Kind')
     return entity
+
+
+class StringMessage(messages.Message):
+    """StringMessage outbound (single) string message"""
+
+    message = messages.StringField(1, required=True)

@@ -1,0 +1,10 @@
+"""User Model definitions for google datastore"""
+
+from google.appengine.ext import ndb
+
+
+class User(ndb.Model):
+    """User profile"""
+
+    name = ndb.StringProperty(required=True)
+    email = ndb.StringProperty()

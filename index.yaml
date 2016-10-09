@@ -27,3 +27,11 @@ indexes:
   - name: score
     direction: desc
   - name: attempts_used
+
+- kind: Win
+  properties:
+  - name: user
+  - name: score
+    direction: desc
+  - name: attempts_used
+    direction: desc

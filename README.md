@@ -1,7 +1,7 @@
 #Programe-api
 
 Api built on google app engine for managing programe saved games and scores. <br />
-See https://github.com/chaduhduh/ProGrAME for game rules and info on playing the game. <br />
+See https://github.com/chaduhduh/ProGrAME for game ui and live demo. <br />
 To browse api explorer go to: <a href="http://programe-api.appspot.com/_ah/api/explorer" target="_blank">http://programe-api.appspot.com/_ah/api/explorer</a><br />
 
 Programe is a puzzle game that helps to teach some basic programming logic. Programe-api serves <br />
@@ -39,17 +39,30 @@ for a valid user the get_level endpoint can be called to get all the details of 
 will be used to build the UI for the game. Level structure is built it standard JSON so it can be parsed for any platform.
 The submit_board enpoint will receive the users solution and will check that against the current levels solution. Response will
 indicate the result of the guess and will update the level accordingly. get_all_highscores (aka the scoreboard) is used to 
-build a scoreboard of the top ranking players. Typical flow will be: 
-create_user -> create_game -> get_level -> submit_board -> get_level -> submit_board -> get_user_rank -> create_game etc.
+build a scoreboard of the top ranking players. <br />
+Typical flow will be:
+1. 'create_user'
+2. 'create_game'
+3. 'get_level'
+4. 'submit_board' 
+5. 'get_level'
+6. 'submit_board'
+7. 'get_user_rank'
+8. 'create_game' 
+9. etc
 
 ##Files Included:
  - api.py: Contains endpoints and invokes our game functions.
  - app.yaml: App configuration.
  - cron.yaml: Cronjob configuration.
  - main.py: Handler for taskqueue handler.
- - models.py: Entity and message definitions including helper methods.
  - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
  - Levels.py: Levels class contains logical design of single level and game levels.
+ - User.py: User entity definitions.
+ - Win.py: Win entity definitions.
+ - Game.py: Game entity definitions.
+ - GameHistory.py: GameHistory entity definitions.
+ - Rank.py: Rank class definition.
 
 ##Cloud Endpoints
 - **create_user**
@@ -63,7 +76,8 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
 - **create_game**
     - Path: 'game'
     - Method: POST
-    - Parameters: user_name, attempts_remaining, attempts_used, score, current_level
+    - Parameters: user_name, attempts_remaining(default=5), attempts_used(default=0), score(default=0), 
+    current_level(default='level_one')
     - Returns: GameForm with initial game state.
     - Description: Creates a new Game. user_name provided must correspond to an
     existing user - will raise a NotFoundException if not. attempts_remaining 
@@ -78,7 +92,7 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
     - Returns: GameForm with current game state.
     - Description: Returns the current state of a game.
 
-- **get_all_games**
+- **get_user_games**
     - Path: 'games/{username}'
     - Method: GET
     - Parameters: username
@@ -144,79 +158,15 @@ create_user -> create_game -> get_level -> submit_board -> get_level -> submit_b
 - **get_high_scores**
     - Path: 'the-scoreboard'
     - Method: GET
-    - Parameters: number_of_results(optional limiter) 
+    - Parameters: number_of_results(optional limiter, default=10) 
     - Returns: WinForms
     - Description: Returns 'the scoreboard'. 
-
-##Models:
- - **User**
-    - Represents unique User profile
-    
- - **Game**
-    - Stores single game states. Associated with User model via KeyProperty.
-
- - **GameHistory**
-    - Stores single game move. This is used to generate 'replays' and possibly 
-    reverting games. Associated with Game model via KeyProperty.
-    
- - **Win**
-    - represents a ended game (reached last level). Associated with Users model via KeyProperty.
-
-##Classes:
- - **Level** 
-    - Level.py - logical design of single level.
-    - Properties: name, pieces, solutions, board_structure, solution_score
-    - isSolution() - Accepts a list that represents solution and compares against solution, returns,
-    True if success False if failure.
- - **All_Levels** 
-    - Level.py - logical design of all game levels. These definitions will propegate to each platform and the ui will be built from this accordingly. Level definitions may eventually move.<br />
-    - Properties: levels
-    - getLevel() - accepts level_name and returns that level information
-    - getLevelByIndex() - accetps and integer index and returns that level of the game
-    - getNextLevel() - accepts level_name and returns the next level in the game
-
-##Methods
-- **_push_game_history()** 
-    - api.py, pushes history for the given user, this is invoked via task and is not invoked directly
-- **get_by_urlsafe()** 
-    - utils.py, Returns an ndb.Model entity that the urlsafe key points to. Checks that the type of entity returned is of the correct kind.<br />
 
 ##Tasks/Crons  (cron.yaml, app.yaml, main.py)
  - **SendReminderEmail(/crons/send_reminder)** 
     - send reminder email every 24 hours for any users who have failed a challenge. This will serve to encourage people to continue. Time limit updated in cron.yaml
  - **pushGameHistory(/tasks/push_game_history)** 
     - invokes the _push_game_history() function to add this move to the task queue. We queue these since generally history is not needed to complete/continue playing.
-
-##Forms Included:
-- **GameForm**
-    - Representation of a Game's state (urlsafe_key, attempts_remaining,
-    attempts_used, game_over flag, message, user_name, current_level, score).
-- **GameFormList**
-    - List of GameForms
-- **GameHistoryForm**
-    - Representation of a users history (user_name, date,
-    action, score, submission, program_compiled, level).
-- **AllHistoryForm**
-    - List of GameHistoryForm
-- **NewGameForm**
-    - Used to create a new game (user_name, attempts_remaning, attempts_used, 
-    score, current_level)
-- **SubmitBoardForm**
-    - Inbound puzzle submission
-- **WinForm**
-    - Representation of a completed game's results (user_name, date, won flag,
-    attempts_used, score).
-- **WinForms**
-    - List of WinForm
-- **LevelForms**
-    - Representation of a single level (name, pieces, solutions, board_structure)
-- **Rank**
-    - Representation of a single user rank (user_name, date, attempts_used, score, 
-    rank int)
-- **RankForm**
-    - List of Rank
-- **StringMessage**
-    - General purpose String container.
 
 
 

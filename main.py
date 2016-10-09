@@ -8,12 +8,11 @@
 
 # imports
 
-import logging
 import webapp2
 from google.appengine.api import mail, app_identity
 from api import ProgrameApi
-from datetime import datetime, timedelta
-from models import User, GameHistory
+from User import User
+from GameHistory import GameHistory
 
 
 # crons
@@ -23,15 +22,16 @@ class SendReminderEmail(webapp2.RequestHandler):
         """Send an email to any users who have a failed game each day"""
 
         app_id = app_identity.get_application_id()
-        users = User.query(User.email is not None)
+        users = User.query(User.email != None)
         for user in users:
             # if user has failed a their last level
 
             history = GameHistory.query(
                 GameHistory.user == user.key).order(-GameHistory.date).get()
             if not history.program_compiled:
-                subject = 'This is a reminder!'
-                body = 'Hello {}, try out Guess A Number!'.format(user.name)
+                subject = 'Dont give up!'
+                body = 'Hello {}, you recently failed a challenge on < ProgGrAME />, now is the time\
+                        to go back and complete it!!!'.format(user.name)
                 mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
                                user.email,
                                subject,

@@ -4,6 +4,8 @@
     built from this accordingly.
 """
 
+from protorpc import messages
+
 
 class Level():
     """Defines a Level"""
@@ -154,3 +156,12 @@ class All_Levels():
             return False
         else:
             return self.levels[index]
+
+
+class LevelForm(messages.Message):
+    """LevelForm for outbound level information"""
+
+    name = messages.StringField(1, required=True)
+    pieces = messages.StringField(2, required=True)
+    solutions = messages.StringField(3, required=True)
+    board_structure = messages.StringField(4, required=True)

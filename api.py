@@ -8,18 +8,44 @@
 
 # imports
 
-import logging
 import endpoints
-from protorpc import remote, messages
-from datetime import datetime
-from Level import All_Levels as Levels
-from Level import Level as Level
 import json
-from models import User, Game, Win, GameHistory
-from models import StringMessage, NewGameForm, GameForm, SubmitBoardForm,\
-    WinForms, LevelForm, GameFormList, RankForm, AllHistoryForm,\
-    GameHistoryForm
-from utils import get_by_urlsafe
+from protorpc import (
+  remote,
+  messages
+)
+from datetime import(
+  datetime
+)
+from Level import(      # game Levels
+  All_Levels as Levels,
+  LevelForm
+)
+from User import(
+  User
+)
+from Game import(
+  Game,
+  GameForm,
+  GameFormList,
+  NewGameForm,
+  SubmitBoardForm
+)
+from GameHistory import(
+  AllHistoryForm,
+  GameHistory
+)
+from Win import(
+  Win,
+  WinForms
+)
+from Rank import(
+  RankForm
+)
+from utils import(
+  get_by_urlsafe,
+  StringMessage
+)
 
 
 # declarations
@@ -28,31 +54,28 @@ levels = Levels()
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
 GET_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),
-    )
-GET_GAMES_REQUEST = endpoints.ResourceContainer(
+)
+GET_DATA_FOR_USERNAME_REQUEST = endpoints.ResourceContainer(
     username=messages.StringField(1),
-    )
-GET_GAME_HISTORY_REQUEST = endpoints.ResourceContainer(
-    username=messages.StringField(1),
-    )
+)
 GET_HIGH_SCORE_REQUEST = endpoints.ResourceContainer(
-    number_of_results=messages.IntegerField(1, required=False, default=10),
-    )
+    number_of_results=messages.IntegerField(1, default=10),
+)
 GET_LEVEL_REQUEST = endpoints.ResourceContainer(
     level_name=messages.StringField(1),
-    )
+)
 SUBMIT_BOARD_REQUEST = endpoints.ResourceContainer(
     SubmitBoardForm,
     urlsafe_game_key=messages.StringField(1)
-    )
+)
 USER_REQUEST = endpoints.ResourceContainer(
     user_name=messages.StringField(1),
     email=messages.StringField(2)
-    )
+)
 DELETE_GAME_REQUEST = endpoints.ResourceContainer(
     urlsafe_game_key=messages.StringField(1),
     username=messages.StringField(2)
-    )
+)
 
 
 # Programe Api
@@ -118,19 +141,19 @@ class ProgrameApi(remote.Service):
             raise endpoints.NotFoundException('Game not found!')
 
     # get all games
-    @endpoints.method(request_message=GET_GAMES_REQUEST,
+    @endpoints.method(request_message=GET_DATA_FOR_USERNAME_REQUEST,
                       response_message=GameFormList,
                       path='games/{username}',
-                      name='get_games',
+                      name='get_user_games',
                       http_method='GET')
-    def get_games(self, request):
+    def get_user_games(self, request):
         """Returns a list of all games for a given user"""
 
         user = User.query(User.name == request.username).get()
         if not user:
             raise endpoints.NotFoundException('No User Found.')
 
-        games = Game.query(Game.user == user.key)
+        games = Game.query(Game.user == user.key, Game.game_over == False)
         if not games:
             raise endpoints.NotFoundException('No Games Found.')
         games_list = [game.to_form("") for game in games] or []
@@ -156,20 +179,25 @@ class ProgrameApi(remote.Service):
                       name='get_user_ranks',
                       http_method='GET')
     def get_user_ranks(self, request):
-        """Returns list of all top players by rank"""
+        """Returns list of all top players by rank (users single best game)"""
 
         user_wins = []
-        users = User.query()
-        for user in users:
-            user_wins.append(Win.query(Win.user == user.key)
-                             .order(-Win.score, Win.attempts_used).get())
+        users = []
+        wins = Win.query().order(-Win.score, Win.attempts_used)
+        for win in wins:
+            name = win.user.get().name or ""
+            print name
+            if name not in users and name is not "":
+                user_wins.append(win)
+                users.append(name)
         user_highscores = []
+        # sort by score
         for i, win in enumerate(user_wins):
             user_highscores.append(win.to_rank(i+1))
         return RankForm(ranks=user_highscores)
 
     # get game history
-    @endpoints.method(request_message=GET_GAME_HISTORY_REQUEST,
+    @endpoints.method(request_message=GET_DATA_FOR_USERNAME_REQUEST,
                       response_message=AllHistoryForm,
                       path='games/history/{username}',
                       name='get_game_history',
@@ -204,7 +232,8 @@ class ProgrameApi(remote.Service):
         # check for existing game from same user
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if not game or user.name is not game.user.get().name:
+        if not game or game.game_over is True
+        or user.name is not game.user.get().name:
             raise endpoints.NotFoundException(
                     'Unable to delete or game does not exist')
         # do delete
@@ -223,7 +252,7 @@ class ProgrameApi(remote.Service):
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game.game_over:
-            return game.to_form('Game already over!')
+            raise endpoints.ForbiddenException("The game is already over.")
 
         current_level = levels.getLevel(game.current_level)
         if current_level is False:    # if for some reason no level go to 1
