@@ -28,8 +28,7 @@ class SendReminderEmail(webapp2.RequestHandler):
             # if user has failed a their last level
 
             history = GameHistory.query(
-                GameHistory.user == user.key)
-                .order(-GameHistory.date).get()
+                GameHistory.user == user.key).order(-GameHistory.date).get()
             if not history.program_compiled:
                 subject = 'This is a reminder!'
                 body = 'Hello {}, try out Guess A Number!'.format(user.name)
