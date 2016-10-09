@@ -7,6 +7,8 @@ To browse api explorer go to: <a href="http://programe-api.appspot.com/_ah/api/e
 Programe is a puzzle game that helps to teach some basic programming logic. Programe-api serves <br />
 as an interface to manage games, levels and users.<br />
 
+![Alt text](https://raw.githubusercontent.com/chaduhduh/ProGrAME/master/images/programe-example.jpg?raw=true "Example Level")
+
 ##Setup Instructions:
 1. Download the Google App Engine SDK for python (python is required to run App Engine SDk)<br />
 2. After install launch Google App Engine SDK<br />
@@ -20,50 +22,59 @@ as an interface to manage games, levels and users.<br />
 **note** to view the api explorer on localhost you will need to launch chrome from the command line with the --unsafely-treat-insecure-origin-as-secure flag set. 
 To do this navigate to the directory you have chrome installed (find chrome.exe). And run the following command: 
 <i>"chrome.exe --user-data-dir=test --unsafely-treat-insecure-origin-as-secure=http://localhost:8080"</i><br />
-10. After openining chrome with the previous flag set and navigating to the "/_ah/api/explorer" directory you are ready to begin testing your endpoints!!
+10. After opening chrome with the previous flag set and navigating to the "/_ah/api/explorer" directory you are ready to begin testing your endpoints!!
 
 ##Game Description:
 Programe is a an educational puzzle game that is designed to teach some basic programming 
-logic. Although intented for beginners some of the puzzles can become quite challenging! 
+logic. Although intended for beginners some of the puzzles can become quite challenging! 
 In the game the user is presented with an available set of pieces and a puzzle board. The object
 of the game is to arrange the pieces to that the simulated program will 'compile'. When the user
-gets the correct solution they recieve a score and move to the next level! Level objectives are given
+gets the correct solution they receive a score and move to the next level! Level objectives are given
 for each level and new pieces get added as the game progresses. Players can not skip levels as each
 one is helpful for the next level. To win the game player MUST complete ALL levels in the current game. 
 Games can contain differing multiples of levels. High scores track the game with the highest score and 
-lowest number of attempts. 
+lowest number of attempts. <br />
+To see how the game is played view the live demo here: http://programe.chaddmyers.com/
+
+## Game Scoring:
+1. Each new game a player creates keeps its own running score. 
+2. Points are achieved by correctly solving each puzzle.
+3. the level solved determines the number of points a player receives.
+4. the total score when the player reaches the last level will be the final score.
+5. Users are ranked by the highest score with the lowest number of attempts. If two users have the
+same score on a game the attempts used will determine the leader. Rank will show the users best game,
+wins will show best of all games.
 
 ##Api Description:
 The create_user and create_game endpoints are used to create a new user and a new game. Once a game is initialized
 for a valid user the get_level endpoint can be called to get all the details of the current level. This information
 will be used to build the UI for the game. Level structure is built it standard JSON so it can be parsed for any platform.
-The submit_board enpoint will receive the users solution and will check that against the current levels solution. Response will
+The submit_board endpoint will receive the users solution and will check that against the current levels solution. Response will
 indicate the result of the guess and will update the level accordingly. get_all_highscores (aka the scoreboard) is used to 
 build a scoreboard of the top ranking players. <br />
 Typical flow will be:
-1. 'create_user'
-2. 'create_game'
-3. 'get_level'
-4. 'submit_board' 
-5. 'get_level'
-6. 'submit_board'
-7. 'get_user_rank'
-8. 'create_game' 
-9. etc
+    1. <code>create_user</code>
+    2. 'create_game'
+    3. 'get_level'
+    4. 'submit_board' 
+    5. 'get_level'
+    6. 'submit_board'
+    7. 'get_user_rank'
+    8. 'create_game' 
+    9. etc
 
-##Files Included:
- - api.py: Contains endpoints and invokes our game functions.
- - app.yaml: App configuration.
- - cron.yaml: Cronjob configuration.
- - main.py: Handler for taskqueue handler.
- - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
- - Levels.py: Levels class contains logical design of single level and game levels.
- - User.py: User entity definitions.
- - Win.py: Win entity definitions.
- - Game.py: Game entity definitions.
- - GameHistory.py: GameHistory entity definitions.
- - Rank.py: Rank class definition.
-
+## Api Usage: 
+    1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer
+    2. generate a new user using the 'create_user'
+    3. create a new game or load an existing game with the 'create_game' and 'get_game' endpoints. The create game endpoint only requires
+    5. call 'get_level' with the game level from the previous response to build out a user interface
+    4. Using the url safe key from the previous response submit a move on the board using the 'submit_board' function.
+    5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one
+    6. submit that request and the response will return the updated game and the new level!
+    7. once the user reaches the last level they will get a registered win.
+    9. 'get_user_wins' will display all wins for a given user and get_wins will display all wins.
+    10. Once some moves have been made game history can be viewed using the 'get_game_history' function
+    
 ##Cloud Endpoints
 - **create_user**
     - Path: 'user'
@@ -161,6 +172,19 @@ Typical flow will be:
     - Parameters: number_of_results(optional limiter, default=10) 
     - Returns: WinForms
     - Description: Returns 'the scoreboard'. 
+
+##Files Included:
+ - api.py: Contains endpoints and invokes our game functions.
+ - app.yaml: App configuration.
+ - cron.yaml: Cronjob configuration.
+ - main.py: Handler for taskqueue handler.
+ - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
+ - Levels.py: Levels class contains logical design of single level and game levels.
+ - User.py: User entity definitions.
+ - Win.py: Win entity definitions.
+ - Game.py: Game entity definitions.
+ - GameHistory.py: GameHistory entity definitions.
+ - Rank.py: Rank class definition.
 
 ##Tasks/Crons  (cron.yaml, app.yaml, main.py)
  - **SendReminderEmail(/crons/send_reminder)** 
