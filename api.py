@@ -232,7 +232,7 @@ class ProgrameApi(remote.Service):
         # check for existing game from same user
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if not game or game.game_over is True
+        if not game or game.game_over is True\
         or user.name is not game.user.get().name:
             raise endpoints.NotFoundException(
                     'Unable to delete or game does not exist')
