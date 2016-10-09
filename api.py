@@ -11,8 +11,6 @@
 import logging
 import endpoints
 from protorpc import remote, messages
-from google.appengine.api import memcache
-from google.appengine.api import taskqueue
 from datetime import datetime
 from Level import All_Levels as Levels
 from Level import Level as Level
@@ -226,51 +224,36 @@ class ProgrameApi(remote.Service):
         if game.game_over:
             return game.to_form('Game already over!')
 
-        game.attempts_remaining -= 1
-        game.attempts_used += 1
         current_level = levels.getLevel(game.current_level)
-
-
-        if current_level is False:
+        if current_level is False:    # if for some reason no level go to 1
             current_level = levels.getLevelByIndex(0)
-            game.current_level = current_level.getName()
+            game.set_level(current_level.getName())
+        # check solution, register move and push this move into history
 
-        # do task stuff this will move
-        history_data = {
-            'user': game.user.get().name,
-            'score': game.score,
-            'action': 'program ran',
-            'submission': request.solution_attempt,
-            'program_compiled': current_level.isSolution(
-                                                request.solution_attempt),
-            'level': game.current_level
-            }
-        taskqueue.add(url='/tasks/push_game_history', params=history_data)
-
-        if not current_level.isSolution(request.solution_attempt):
+        is_solution = current_level.isSolution(request.solution_attempt)
+        if is_solution:
+            game.register_score(current_level.getSolutionScore())
+        game.register_move()
+        game.push_history(request.solution_attempt,
+                          'Run Program',
+                          is_solution
+                          )
+        if not is_solution:
             game.put()
             return game.to_form("There was a bug in your code!!")
         # solved - register score and get the next level
 
-        game.score += current_level.getSolutionScore()
-        game.attempts_remaining += 5
         next_level = levels.getNextLevel(current_level.getName())
-
-        if next_level is False:    # no levels left
-            game.current_level = "Winner"
+        if next_level is False:    # no levels left means win
+            game.set_level("winner")
             game.end_game(True)
             return game.to_form("You have reached the end of the game,\
                                   click to view your ranks")
+        # set next level and return game state
 
-        game.current_level = next_level.getName()
-        # end game or update game datad
-
-        if game.attempts_remaining < 1:
-            game.end_game(False)
-            return game.to_form('Game over!')
-        else:
-            game.put()
-            return game.to_form("Program Compiled!")
+        game.set_level(next_level.getName())
+        game.put()
+        return game.to_form("Program Compiled!")
 
     # get wins - aka completed game
     @endpoints.method(response_message=WinForms,

@@ -8,6 +8,7 @@ from datetime import date
 from datetime import datetime
 from protorpc import messages
 from google.appengine.ext import ndb
+from google.appengine.api import taskqueue
 
 
 # models
@@ -57,6 +58,10 @@ class Game(ndb.Model):
         the player lost."""
 
         self.game_over = True
+        if not won:
+            self.message = "Game Over"
+        else:
+            self.message = "Winner"
         self.put()
         # Add the game to the score 'board'
         game_win = Win(
@@ -67,6 +72,36 @@ class Game(ndb.Model):
                     score=self.score
                     )
         game_win.put()
+
+    def register_move(self):
+        """defines what happens when a player clicks submit """
+
+        if self.attempts_remaining < 1:
+            self.end_game(False)
+        self.attempts_remaining -= 1
+        self.attempts_used += 1
+
+    def set_level(self, level_name):
+        """sets the current game level **note** this does not write"""
+
+        self.current_level = level_name
+
+    def push_history(self, submission, action, program_compiled):
+        """pushes this move into history"""
+
+        history_data = {
+            'user': self.user.get().name,
+            'score': self.score,
+            'action': action,
+            'submission': submission,
+            'program_compiled': program_compiled,
+            'level': self.current_level
+        }
+        taskqueue.add(url='/tasks/push_game_history', params=history_data)
+
+    def register_score(self, score):
+        self.score += score
+        self.attempts_remaining += 5  # + five moves a win
 
 
 class GameHistory(ndb.Model):
