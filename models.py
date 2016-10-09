@@ -62,16 +62,16 @@ class Game(ndb.Model):
             self.message = "Game Over"
         else:
             self.message = "Winner"
-        self.put()
-        # Add the game to the score 'board'
-        game_win = Win(
+            game_win = Win(
                     user=self.user,
                     date=datetime.utcnow(),
                     won=True,
                     attempts_used=self.attempts_used,
                     score=self.score
                     )
-        game_win.put()
+            game_win.put()
+        self.put()
+        # Add the game to the score 'board'
 
     def register_move(self):
         """defines what happens when a player clicks submit """
