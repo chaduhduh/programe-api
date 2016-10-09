@@ -94,7 +94,8 @@ class ProgrameApi(remote.Service):
                     'A User with that name does not exist!')
         try:
             game = Game.create_game(user.key, request.attempts_remaining,
-                                    request.score)
+                                    request.attempts_used, request.score,
+                                    request.current_level)
         except ValueError:
             raise endpoints.BadRequestException('Maximum must be greater '
                                                 'than minimum!')

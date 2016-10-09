@@ -31,11 +31,13 @@ class Game(ndb.Model):
     score = ndb.IntegerProperty(required=True, default=0)
 
     @classmethod
-    def create_game(self, user, attempts_remaining, score=0):
+    def create_game(self, user, attempts_remaining, attempts_used=0,
+                    score=0, current_level='level_one'):
         """Creates and returns a new game"""
 
-        game = Game(user=user,
-                    attempts_remaining=attempts_remaining, score=score)
+        game = Game(user=user, attempts_remaining=attempts_remaining,
+                    score=score, attempts_used=attempts_used,
+                    current_level=current_level)
         game.put()
         return game
 
