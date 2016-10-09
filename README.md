@@ -9,7 +9,7 @@ as an interface to manage games, levels and users.<br />
 
 ![Alt text](https://raw.githubusercontent.com/chaduhduh/ProGrAME/master/images/programe-example.jpg?raw=true "Example Level")
 
-##Setup Instructions:
+##Api Local Setup Instructions:
 1. Download the Google App Engine SDK for python (python is required to run App Engine SDk)<br />
 2. After install launch Google App Engine SDK<br />
 3. Clone the programe-api repo to your machine (or download the zip) to the location of your choice<br />
@@ -67,17 +67,17 @@ Typical flow will be:<br />
     9. etc
 
 ## Api Usage: 
-    1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer<br />
-    2. generate a new user using the <code>create_user</code><br />
-    3. create a new game or load an existing game with the <code>create_game</code> and <code>get_game</code> endpoints. The create game endpoint only requires<br />
-    5. call <code>get_level</code> with the game level from the previous response to build out a user interface<br />
-    4. Using the url safe key from the previous response submit a move on the board using the <code>submit_board</code> function.<br />
-    5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one<br />
-    6. submit that request and the response will return the updated game and the new level!<br />
-    7. once the user reaches the last level they will get a registered win.<br />
-    9. <code>get_user_wins</code> will display all wins for a given user and get_wins will display all wins.<br />
-    10. Once some moves have been made game history can be viewed using the <code>get_game_history</code> function<br />
-    11. ** note ** currently levels are in progress. For the meantime there are only three levels. 'level_one', 'level_two', 'level_three'
+1. navigate to the api explorer at http://localhost:{port}/_ah/api/explorer<br />
+2. generate a new user using the <code>create_user</code><br />
+3. create a new game or load an existing game with the <code>create_game</code> and <code>get_game</code> endpoints. The create game endpoint only requires<br />
+5. call <code>get_level</code> with the game level from the previous response to build out a user interface<br />
+4. Using the url safe key from the previous response submit a move on the board using the <code>submit_board</code> function.<br />
+5. Put the key into the key field and in the solution field enter "start,print,game,end" which is the solution for level one<br />
+6. submit that request and the response will return the updated game and the new level!<br />
+7. once the user reaches the last level they will get a registered win.<br />
+9. <code>get_user_wins</code> will display all wins for a given user and get_wins will display all wins.<br />
+10. Once some moves have been made game history can be viewed using the <code>get_game_history</code> function<br />
+11. ** note ** currently levels are in progress. For the meantime there are only three levels. 'level_one', 'level_two', 'level_three'
     
 ##Cloud Endpoints
 - **create_user**
