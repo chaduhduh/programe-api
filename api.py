@@ -11,40 +11,30 @@
 import endpoints
 import json
 from protorpc import (
-  remote,
-  messages
+    remote,
+    messages
 )
 from datetime import(
-  datetime
+    datetime
 )
-from Level import(      # game Levels
-  All_Levels as Levels,
-  LevelForm
-)
-from User import(
-  User
-)
-from Game import(
-  Game,
-  GameForm,
-  GameFormList,
-  NewGameForm,
-  SubmitBoardForm
-)
-from GameHistory import(
-  AllHistoryForm,
-  GameHistory
-)
-from Win import(
-  Win,
-  WinForms
-)
-from Rank import(
-  RankForm
+from models import(
+    All_Levels as Levels,
+    LevelForm,
+    User,
+    Game,
+    GameForm,
+    GameFormList,
+    NewGameForm,
+    SubmitBoardForm,
+    AllHistoryForm,
+    GameHistory,
+    Win,
+    WinForms,
+    RankForm
 )
 from utils import(
-  get_by_urlsafe,
-  StringMessage
+    get_by_urlsafe,
+    StringMessage
 )
 
 
@@ -227,15 +217,16 @@ class ProgrameApi(remote.Service):
 
         user = User.query(User.name == request.username).get()
         if not user:
-            raise endpoints.NotFoundException(
-                    'A User with that name does not exist!')
+            raise endpoints.NotFoundException('A User with that name does not exist!')
         # check for existing game from same user
 
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if not game or game.game_over is True\
-        or user.name is not game.user.get().name:
-            raise endpoints.NotFoundException(
-                    'Unable to delete or game does not exist')
+        if not game:
+          raise endpoints.NotFoundException('Unable to delete, game does not exist')
+        if game.game_over is True:
+          raise endpoints.NotFoundException('Game is already over')
+        if user.name is not game.user.get().name:
+            raise endpoints.NotFoundException('Game does not belong to this user')
         # do delete
 
         game.key.delete()

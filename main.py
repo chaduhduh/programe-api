@@ -11,8 +11,10 @@
 import webapp2
 from google.appengine.api import mail, app_identity
 from api import ProgrameApi
-from User import User
-from GameHistory import GameHistory
+from models import(
+    GameHistory,
+    User
+)
 
 
 # crons
@@ -28,7 +30,7 @@ class SendReminderEmail(webapp2.RequestHandler):
 
             history = GameHistory.query(
                 GameHistory.user == user.key).order(-GameHistory.date).get()
-            if history.program_compiled is not True:
+            if history and history.program_compiled is not True:
                 subject = 'Dont give up!'
                 body = 'Hello {}, you recently failed a challenge on < ProgGrAME />, now is the time\
                         to go back and complete it!!!'.format(user.name)
