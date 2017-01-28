@@ -70,7 +70,7 @@ DELETE_GAME_REQUEST = endpoints.ResourceContainer(
 
 # Programe Api
 
-@endpoints.api(name='programe', version='v1')
+@endpoints.api(name='programe', version='v1', auth_level=endpoints.AUTH_LEVEL.NONE)
 class ProgrameApi(remote.Service):
     """Configures and Manages Programe users, games, levels,
     and game settings."""
