@@ -320,8 +320,8 @@ class ProgrameApi(remote.Service):
         return LevelForm(
                   name=level.getName(),
                   pieces=json.dumps(level.getPieces()),
-                  solutions=str(level.getSolutions()),
-                  board_structure=str(level.getBoardStructure())
+                  solutions=json.dumps(level.getSolutions()),
+                  board_structure=json.dumps(level.getBoardStructure())
                   )
 
     # push game history
