@@ -319,7 +319,7 @@ class ProgrameApi(remote.Service):
                     'Level Not Found')
         return LevelForm(
                   name=level.getName(),
-                  pieces=json.dumps(level.getPieces()),
+                  pieces=level.getPieces(),
                   solutions=json.dumps(level.getSolutions()),
                   board_structure=json.dumps(level.getBoardStructure())
                   )
