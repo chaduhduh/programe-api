@@ -82,8 +82,7 @@ class All_Levels():
                 "pieces": ["start"]
             },
             {
-                "pieces": [],  # this is how nested rows are defined,
-                "rows": []
+                "pieces": ["print", "game"]
             },
             {
                 "pieces": ["end"]
@@ -100,7 +99,8 @@ class All_Levels():
     level_two.setSolutionScore(15)
     level_two.setBoardStructure({
         "rows": [{
-                "pieces": ["start"]
+                "pieces": ["start"],
+                "rows": []  # this is how nested rows are defined,
             },
             {
                 "pieces": ["end"]
