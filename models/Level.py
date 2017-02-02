@@ -74,7 +74,7 @@ class All_Levels():
     # Level One
     level_one = Level()
     level_one.setName("level_one")
-    level_one.setPieces(["start,print,game,end"])
+    level_one.setPieces("start,print,game,end")
     level_one.setSolutions(["start,print,game,end"])
     level_one.setSolutionScore(10)
     level_one.setBoardStructure({
@@ -95,7 +95,7 @@ class All_Levels():
     # Level Two
     level_two = Level()
     level_two.setName("level_two")
-    level_two.setPieces(["start,end"])
+    level_two.setPieces("start,end")
     level_two.setSolutions(["start,end"])
     level_two.setSolutionScore(15)
     level_two.setBoardStructure({
@@ -112,7 +112,7 @@ class All_Levels():
     # Level Three
     level_three = Level()
     level_three.setName("level_three")
-    level_three.setPieces(["start,return,current_value,end"])
+    level_three.setPieces("start,return,current_value,end")
     level_three.setSolutions(["start,return,current_value,end"])
     level_three.setSolutionScore(20)
     level_three.setBoardStructure({
