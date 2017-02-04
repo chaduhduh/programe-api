@@ -260,6 +260,8 @@ class ProgrameApi(remote.Service):
                           is_solution
                           )
         if not is_solution:
+            if game.attempts_remaining is 0:
+                game.end_game(True)
             game.put()
             return game.to_form("There was a bug in your code!!")
         # solved - register score and get the next level
