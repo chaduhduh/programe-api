@@ -4,7 +4,12 @@
     built from this accordingly.
 """
 
-from protorpc import messages
+from protorpc import (
+    messages
+)
+from Piece import (
+    Piece
+)
 
 
 class Level():
@@ -71,7 +76,15 @@ class All_Levels():
 
     levels = []
 
+    
     # Level One
+
+    #   pieces
+    startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
+    printPiece = Piece({"name": "print", "display_name": "Print", "index": 1, "type": "action"}).toJson()
+    gamePiece = Piece({"name": "game", "display_name": "'Game'", "index": 2,  "type": "string"}).toJson()
+    endPiece = Piece({"name": "end", "display_name": "End", "index": 3, "type" : "end"}).toJson()
+    #   level
     level_one = Level()
     level_one.setName("level_one")
     level_one.setPieces("start,print,game,end")
@@ -79,19 +92,24 @@ class All_Levels():
     level_one.setSolutionScore(10)
     level_one.setBoardStructure({
         "rows": [{
-                "pieces": ["start"]
+                "pieces": [startPiece]
             },
             {
-                "pieces": ["print", "game"]
+                "pieces": [printPiece, gamePiece]
             },
             {
-                "pieces": ["end"]
+                "pieces": [endPiece]
             }
         ]
     })
     levels.append(level_one)
 
     # Level Two
+
+    #   pieces
+    startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
+    endPiece = Piece({"name": "end", "display_name": "End", "index": 1, "type" : "end"}).toJson()
+    #   level
     level_two = Level()
     level_two.setName("level_two")
     level_two.setPieces("start,end")
@@ -99,28 +117,36 @@ class All_Levels():
     level_two.setSolutionScore(15)
     level_two.setBoardStructure({
         "rows": [{
-                "pieces": ["start"],
+                "pieces": [startPiece],
                 "rows": []  # this is how nested rows are defined,
             },
             {
-                "pieces": ["end"]
+                "pieces": [endPiece]
             }
         ]
     })
     levels.append(level_two)
 
+
     # Level Three
+
+    #   pieces
+    startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
+    startPiece = Piece({"name": "return", "display_name": "Start", "index": 1, "type": "action"}).toJson()
+    startPiece = Piece({"name": "x", "display_name": "X", "index": 2, "type": "value"}).toJson()
+    endPiece = Piece({"name": "end", "display_name": "End", "index": 3, "type" : "end"}).toJson()
+    #   level
     level_three = Level()
     level_three.setName("level_three")
-    level_three.setPieces("start,return,current_value,end")
-    level_three.setSolutions(["start,return,current_value,end"])
+    level_three.setPieces("start,return,x,end")
+    level_three.setSolutions(["start,return,x,end"])
     level_three.setSolutionScore(20)
     level_three.setBoardStructure({
         "rows": [{
                 "pieces": ["start"]
             },
             {
-                "pieces": ["return", "current_value"]
+                "pieces": ["return", "x"]
             },
             {
                 "pieces": ["end"]
