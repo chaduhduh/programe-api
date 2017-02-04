@@ -132,8 +132,8 @@ class All_Levels():
 
     #   pieces
     startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
-    startPiece = Piece({"name": "return", "display_name": "Start", "index": 1, "type": "action"}).toJson()
-    startPiece = Piece({"name": "x", "display_name": "X", "index": 2, "type": "value"}).toJson()
+    returnPiece = Piece({"name": "return", "display_name": "Start", "index": 1, "type": "action"}).toJson()
+    xPiece = Piece({"name": "x", "display_name": "X", "index": 2, "type": "value"}).toJson()
     endPiece = Piece({"name": "end", "display_name": "End", "index": 3, "type" : "end"}).toJson()
     #   level
     level_three = Level()
@@ -143,17 +143,45 @@ class All_Levels():
     level_three.setSolutionScore(20)
     level_three.setBoardStructure({
         "rows": [{
-                "pieces": ["start"]
+                "pieces": [startPiece]
             },
             {
-                "pieces": ["return", "x"]
+                "pieces": [returnPiece, xPiece]
             },
             {
-                "pieces": ["end"]
+                "pieces": [endPiece]
             }
         ]
     })
     levels.append(level_three)
+
+
+    # Level Four
+
+    #   pieces
+    startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
+    returnPiece = Piece({"name": "return", "display_name": "Start", "index": 1, "type": "action"}).toJson()
+    xPiece = Piece({"name": "x", "display_name": "X", "index": 2, "type": "value"}).toJson()
+    endPiece = Piece({"name": "end", "display_name": "End", "index": 3, "type" : "end"}).toJson()
+    #   level
+    level_four = Level()
+    level_four.setName("level_four")
+    level_four.setPieces("start,return,x,end")
+    level_four.setSolutions(["start,return,x,end"])
+    level_four.setSolutionScore(20)
+    level_four.setBoardStructure({
+        "rows": [{
+                "pieces": [startPiece]
+            },
+            {
+                "pieces": [returnPiece, xPiece]
+            },
+            {
+                "pieces": [endPiece]
+            }
+        ]
+    })
+    levels.append(level_four)
 
     def getLevel(self, level_name):
         """ returns a specific level from name """
