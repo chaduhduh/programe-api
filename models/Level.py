@@ -20,6 +20,8 @@ class Level():
     _solutions = []
     _board_structure = {}
     _solution_score = 0
+    _instructions = ""
+    _display_name = ""
 
     # name
     def setName(self, name):
@@ -27,6 +29,13 @@ class Level():
 
     def getName(self):
         return self._name or ""
+
+    # display name
+    def setDisplayName(self, display_name):
+        self._display_name = display_name
+
+    def getDisplayName(self):
+        return self._display_name or ""
 
     # pieces
     def setPieces(self, pieces):
@@ -55,6 +64,13 @@ class Level():
 
     def getSolutionScore(self):
         return self._solution_score or 0
+
+    # level instructions
+    def setInstructions(self, instructions):
+        self._instructions = instructions
+
+    def getInstructions(self):
+        return self._instructions or ""
 
     # functions
     def isSolution(self, str):
@@ -87,8 +103,10 @@ class All_Levels():
     #   level
     level_one = Level()
     level_one.setName("level_one")
+    level_one.setDisplayName("Level One")
     level_one.setPieces("start,print,game,end")
     level_one.setSolutions(["start,print,game,end"])
+    level_one.setInstructions("Order the pieces so that this program will print the text 'game'.")
     level_one.setSolutionScore(10)
     level_one.setBoardStructure({
         "rows": [{
@@ -112,8 +130,10 @@ class All_Levels():
     #   level
     level_two = Level()
     level_two.setName("level_two")
+    level_two.setDisplayName("Level Two")
     level_two.setPieces("start,end")
     level_two.setSolutions(["start,end"])
+    level_two.setInstructions("Order the pieces so that this program will run without error.")
     level_two.setSolutionScore(15)
     level_two.setBoardStructure({
         "rows": [{
@@ -138,8 +158,10 @@ class All_Levels():
     #   level
     level_three = Level()
     level_three.setName("level_three")
+    level_three.setDisplayName("Level Three")
     level_three.setPieces("start,return,x,end")
     level_three.setSolutions(["start,return,x,end"])
+    level_three.setInstructions("Order the pieces so that this program will return the value of 'x' variable.")
     level_three.setSolutionScore(20)
     level_three.setBoardStructure({
         "rows": [{
@@ -166,8 +188,10 @@ class All_Levels():
     #   level
     level_four = Level()
     level_four.setName("level_four")
+    level_four.setDisplayName("Level Four")
     level_four.setPieces("start,return,x,end")
     level_four.setSolutions(["start,return,x,end"])
+    level_four.setInstructions("Order the pieces so that this program will return the value of 'x' variable.")
     level_four.setSolutionScore(20)
     level_four.setBoardStructure({
         "rows": [{
@@ -219,3 +243,5 @@ class LevelForm(messages.Message):
     pieces = messages.StringField(2, required=True)
     solutions = messages.StringField(3, required=True)
     board_structure = messages.StringField(4, required=True)
+    instructions = messages.StringField(5, required=False)
+    display_name = messages.StringField(6, required=True)
