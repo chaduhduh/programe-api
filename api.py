@@ -321,11 +321,11 @@ class ProgrameApi(remote.Service):
                     'Level Not Found')
         return LevelForm(
                   name=level.getName(),
-                  display_name=json.dumps(level.getDisplayName()),
+                  display_name=level.getDisplayName(),
                   pieces=level.getPieces(),
                   solutions=json.dumps(level.getSolutions()),
                   board_structure=json.dumps(level.getBoardStructure()),
-                  instructions=json.dumps(level.getInstructions())
+                  instructions=level.getInstructions()
                   )
 
     # push game history
