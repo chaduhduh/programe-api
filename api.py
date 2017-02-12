@@ -70,7 +70,13 @@ DELETE_GAME_REQUEST = endpoints.ResourceContainer(
 
 # Programe Api
 
-@endpoints.api(name='programe', version='v1', scopes=[endpoints.EMAIL_SCOPE])
+@endpoints.api(
+  name='programe',
+  version='v1',
+  scopes=[endpoints.EMAIL_SCOPE],
+  allowed_client_ids=['865219280218-dj3opijm1ffginqahljht6ok63n54ivq.apps.googleusercontent.com']
+  auth_level=endpoints.AUTH_LEVEL.REQUIRED
+  )
 class ProgrameApi(remote.Service):
     """Configures and Manages Programe users, games, levels,
     and game settings."""
