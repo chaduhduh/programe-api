@@ -84,12 +84,12 @@ class ProgrameApi(remote.Service):
     def create_user(self, request):
         """Creates a new User. Requires a unique username"""
 
-        user = endpoints.get_current_user()
-        user_name = user.email() if user else 'Anonymous'
-        # TODO: this should use the oauth info
-        if user_name is None or user_name is 'Anonymous':
-            raise endpoints.UnauthorizedException(
-                    'Log in to create a user')
+        # user = endpoints.get_current_user()
+        # user_name = user.email() if user else 'Anonymous'
+        # # TODO: this should use the oauth info
+        # if user_name is None or user_name is 'Anonymous':
+        #     raise endpoints.UnauthorizedException(
+        #             'Log in to create a user')
         if User.query(User.name == request.user_name).get():
             raise endpoints.ConflictException(
                     'A User with that name already exists!')
