@@ -70,7 +70,7 @@ DELETE_GAME_REQUEST = endpoints.ResourceContainer(
 
 # Programe Api
 
-@endpoints.api(name='programe', version='v1', auth_level=endpoints.AUTH_LEVEL.NONE)
+@endpoints.api(name='programe', version='v1', scopes=[endpoints.EMAIL_SCOPE])
 class ProgrameApi(remote.Service):
     """Configures and Manages Programe users, games, levels,
     and game settings."""
@@ -84,7 +84,12 @@ class ProgrameApi(remote.Service):
     def create_user(self, request):
         """Creates a new User. Requires a unique username"""
 
-        if User.query(User.name == request.user_name).get():
+        user = endpoints.get_current_user()
+        user_name = user.email() if user else 'Anonymous'
+        if user_name is 'Anonymous':
+            raise endpoints.ConflictException(
+                    'Log in to create a user')
+        if User.query(User.name == user_name).get():
             raise endpoints.ConflictException(
                     'A User with that name already exists!')
         user = User(name=request.user_name, email=request.email)
