@@ -87,7 +87,7 @@ class ProgrameApi(remote.Service):
         user = endpoints.get_current_user()
         user_name = user.email() if user else 'Anonymous'
         if user_name is 'Anonymous':
-            raise endpoints.ConflictException(
+            raise endpoints.UnauthorizedException(
                     'Log in to create a user')
         if User.query(User.name == user_name).get():
             raise endpoints.ConflictException(
