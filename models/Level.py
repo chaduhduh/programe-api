@@ -152,23 +152,32 @@ class All_Levels():
 
     #   pieces
     startPiece = Piece({"name": "start", "display_name": "Start", "index": 0, "type": "start"}).toJson()
-    returnPiece = Piece({"name": "return", "display_name": "Start", "index": 1, "type": "action"}).toJson()
-    xPiece = Piece({"name": "x", "display_name": "X", "index": 2, "type": "value"}).toJson()
-    endPiece = Piece({"name": "end", "display_name": "End", "index": 3, "type" : "end"}).toJson()
+    whilePiece = Piece({"name": "while", "display_name": "While", "index": 1, "type": "action"}).toJson()
+    truePiece = Piece({"name": "true", "display_name": "True", "index": 2, "type": "value"}).toJson()
+    returnPiece = Piece({"name": "return", "display_name": "Start", "index": 3, "type": "action"}).toJson()
+    xPiece = Piece({"name": "x", "display_name": "X", "index": 4, "type": "value"}).toJson()
+    endWhilePiece = Piece({"name": "endwhile", "display_name": "Endwhile", "index": 5, "type": "action"}).toJson()
+    endPiece = Piece({"name": "end", "display_name": "End", "index": 6, "type" : "end"}).toJson()
     #   level
     level_three = Level()
     level_three.setName("level_three")
     level_three.setDisplayName("Level Three")
-    level_three.setPieces("start,return,x,end")
-    level_three.setSolutions(["start,return,x,end"])
-    level_three.setInstructions("Order the pieces so that this program will return the value of 'x' variable.")
+    level_three.setPieces("start,while,true,return,x,endwhile,end")
+    level_three.setSolutions(["start,while,true,return,x,endwhile,end"])
+    level_three.setInstructions("Order the pieces so that this program will return the value of 'x' variable infinitely.")
     level_three.setSolutionScore(20)
     level_three.setBoardStructure({
         "rows": [{
                 "pieces": [startPiece]
             },
             {
-                "pieces": [returnPiece, xPiece]
+                "pieces": [whilePiece]
+                "rows": [
+                    {"pieces": [returnPiece, xPiece]}
+                ]  # this is how nested rows are defined,
+            },
+            {
+                "pieces": [endWhilePiece]
             },
             {
                 "pieces": [endPiece]
