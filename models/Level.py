@@ -171,7 +171,7 @@ class All_Levels():
                 "pieces": [startPiece]
             },
             {
-                "pieces": [whilePiece]
+                "pieces": [whilePiece],
                 "rows": [
                     {"pieces": [returnPiece, xPiece]}
                 ]  # this is how nested rows are defined,
