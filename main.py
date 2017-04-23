@@ -34,10 +34,10 @@ class SendReminderEmail(webapp2.RequestHandler):
                 subject = 'Dont give up!'
                 body = 'Hello {}, you recently failed a challenge on < ProgGrAME />, now is the time\
                         to go back and complete it!!!'.format(user.name)
-                mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
-                               user.email,
-                               subject,
-                               body)
+                # mail.send_mail('noreply@{}.appspotmail.com'.format(app_id),
+                #                user.email,
+                #                subject,
+                #                body)
 
 
 # tasks
